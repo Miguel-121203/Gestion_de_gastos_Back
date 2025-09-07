@@ -25,6 +25,14 @@ Aplicación **backend** para la gestión integral de gastos personales que inclu
 
 ## 📊 Épicas de Desarrollo
 
+### 🗄️ Épica de Base de Datos
+**Fase 1: Diseño e Implementación del Esquema**  
+**Duración estimada:** 2 semanas  
+
+**Entregables:**
+- Diagrama entidad-relación completo  
+- Scripts de creación de tablas  
+
 ### 🚀 Épica 1: Gestión de Gastos y Categorías
 **Duración estimada:** 3-4 semanas  
 
@@ -81,14 +89,6 @@ Aplicación **backend** para la gestión integral de gastos personales que inclu
 - Panel de configuración de usuario  
 
 ---
-
-### 🗄️ Épica de Base de Datos
-**Fase 1: Diseño e Implementación del Esquema**  
-**Duración estimada:** 2 semanas  
-
-**Entregables:**
-- Diagrama entidad-relación completo  
-- Scripts de creación de tablas  
 
 ---
 
