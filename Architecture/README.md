@@ -6,7 +6,6 @@ Sistema de gestión de gastos personales basado en **arquitectura de microservic
 
 - ✅ **6 microservicios independientes**
 - ✅ **Base de datos única PostgreSQL** (compartida)
-- ✅ **Sin Redis ni RabbitMQ** (arquitectura simplificada)
 - ✅ **Comunicación HTTP/REST** directa
 - ✅ **JWT Authentication**
 - ✅ **API Gateway** como punto de entrada único
@@ -25,28 +24,23 @@ Sistema de gestión de gastos personales basado en **arquitectura de microservic
 
 ```
 ┌─────────────────────────────────────┐
-│         Frontend (React/Vue)         │
-│                         │
+│         Frontend (React)            │
 └─────────────┬───────────────────────┘
               │ HTTPS + JWT
 ┌─────────────▼───────────────────────┐
-│          API Gateway                 │
-│                       │
+│          API Gateway                │
 └─────────────┬───────────────────────┘
               │
 ┌─────────────▼───────────────────────┐
-│         Microservicios               │
-├──────────────────────────────────────┤
-│ Auth     │ User    │ Category        │
-│
-├──────────────────────────────────────┤
-│ Expense  │ Income  │ Report          │
-│
+│         Microservicios   (Java)     │
+├─────────────────────────────────────┤
+│ Auth     │ User    │ Category       │
+├─────────────────────────────────────┤
+│ Expense  │ Income  │ Report         │
 └─────────────┬───────────────────────┘
               │
 ┌─────────────▼───────────────────────┐
-│        PostgreSQL Database           │
-│
+│        PostgreSQL Database          │
 └─────────────────────────────────────┘
 ```
 
@@ -64,7 +58,6 @@ Sistema de gestión de gastos personales basado en **arquitectura de microservic
 ### 2. API Gateway
 
 - **Puerto:** 8000
-- **Tecnología:** Express Gateway / Kong / Spring Cloud Gateway
 - **Funciones:**
   - 🚪 Punto de entrada único
   - 🔀 Enrutamiento de peticiones
@@ -87,7 +80,6 @@ Sistema de gestión de gastos personales basado en **arquitectura de microservic
 
 ### 🔐 1. Auth Service
 
-**Puerto:** 3001  
 **Responsabilidad:** Autenticación y seguridad
 
 #### Funciones Principales:
@@ -102,7 +94,6 @@ Sistema de gestión de gastos personales basado en **arquitectura de microservic
 
 ### 👤 2. User Service
 
-**Puerto:** 3002  
 **Responsabilidad:** Gestión de perfiles y preferencias
 
 #### Funciones Principales:
@@ -116,7 +107,6 @@ Sistema de gestión de gastos personales basado en **arquitectura de microservic
 
 ### 📁 3. Category Service
 
-**Puerto:** 3003  
 **Responsabilidad:** Administración de categorías y presupuestos
 
 #### Funciones Principales:
@@ -130,7 +120,6 @@ Sistema de gestión de gastos personales basado en **arquitectura de microservic
 
 ### 💰 4. Expense Service
 
-**Puerto:** 3004  
 **Responsabilidad:** Gestión completa de gastos
 
 #### Funciones Principales:
@@ -143,7 +132,6 @@ Sistema de gestión de gastos personales basado en **arquitectura de microservic
 
 ### 💵 5. Income Service
 
-**Puerto:** 3005  
 **Responsabilidad:** Gestión completa de ingresos
 
 #### Funciones Principales:
@@ -157,7 +145,6 @@ Sistema de gestión de gastos personales basado en **arquitectura de microservic
 
 ### 📊 6. Report Service
 
-**Puerto:** 3006  
 **Responsabilidad:** Generación de reportes y análisis
 
 #### Funciones Principales:
