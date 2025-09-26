@@ -1,7 +1,11 @@
-name: Debug Dockerfile
+name: Release - Dev
 
 on:
   workflow_dispatch:
+  push:
+    branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
 
 jobs:
   debug-only:
