@@ -15,12 +15,11 @@ import java.time.LocalDateTime;
 public class ExpenseResponse {
     private Long expenseId;
     private BigDecimal amount;
-    private String currency;
+    private Long expenseCategoryId;
     private LocalDateTime expenseDate;
     private String description;
-    private String tags;
     private Long userId;
-    private Long expenseCategoryId;
+    private Boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

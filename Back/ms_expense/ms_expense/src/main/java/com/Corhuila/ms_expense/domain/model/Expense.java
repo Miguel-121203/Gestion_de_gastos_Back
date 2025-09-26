@@ -24,8 +24,8 @@ public class Expense {
     @Column(name = "amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "currency", nullable = false, length = 3)
-    private String currency;
+    @Column(name = "expense_category_id", nullable = false)
+    private Long expenseCategoryId;
 
     @Column(name = "expense_date", nullable = false)
     private LocalDateTime expenseDate;
@@ -33,14 +33,12 @@ public class Expense {
     @Column(name = "description", length = 500)
     private String description;
 
-    @Column(name = "tags", length = 255)
-    private String tags;
-
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "expense_category_id", nullable = false)
-    private Long expenseCategoryId;
+    @Column(name = "active", nullable = false)
+    @Builder.Default
+    private Boolean active = true;
 
     @Column(name = "created_at")
     @Builder.Default

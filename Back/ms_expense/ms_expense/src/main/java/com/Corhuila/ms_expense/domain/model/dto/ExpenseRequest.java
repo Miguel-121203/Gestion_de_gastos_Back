@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -19,24 +19,17 @@ public class ExpenseRequest {
     @Digits(integer = 17, fraction = 2, message = "Amount must have at most 17 integer digits and 2 decimal places")
     private BigDecimal amount;
 
-    @NotBlank(message = "Currency is required")
-    @Size(max = 3, message = "Currency must be 3 characters max")
-    private String currency;
+    @NotNull(message = "Expense category ID is required")
+    @Positive(message = "Expense category ID must be positive")
+    private Long expenseCategoryId;
 
     @NotNull(message = "Expense date is required")
-    private LocalDateTime expenseDate;
+    private LocalDate expenseDate;
 
     @Size(max = 500, message = "Description must be 500 characters max")
     private String description;
 
-    @Size(max = 255, message = "Tags must be 255 characters max")
-    private String tags;
-
     @NotNull(message = "User ID is required")
     @Positive(message = "User ID must be positive")
     private Long userId;
-
-    @NotNull(message = "Expense category ID is required")
-    @Positive(message = "Expense category ID must be positive")
-    private Long expenseCategoryId;
 }
