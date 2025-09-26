@@ -12,8 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    command: postgres -c listen_addresses='*' -c log_connections=on
+      - ./DB/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
 volumes:
   postgres_data:

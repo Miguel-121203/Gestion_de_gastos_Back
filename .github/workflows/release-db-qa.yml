@@ -1,0 +1,20 @@
+name: Release DB QA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-db:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Start DB with Docker Compose (QA)
+        working-directory: ./DB
+        run: |
+          docker compose -p expense-db-qa up -d
