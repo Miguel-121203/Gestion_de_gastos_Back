@@ -1,9 +1,9 @@
 name: Release - Dev
 
 on:
+  workflow_dispatch:
   push:
     branches: ["dev"]
-  workflow_dispatch:
 
 jobs:
   build-and-push:
@@ -32,8 +32,8 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build backend (dev)
+        working-directory: ./Back/ms_expense/ms_expense
         run: |
-          cd ./Back/ms_expense/ms_expense
           docker build -t ${{ secrets.DOCKER_USERNAME }}/gestion-back:dev .
 
       - name: Push backend a Docker Hub (dev)
