@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
 
 jobs:
   build-and-push:
@@ -19,9 +21,17 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: Build with Maven
+      - name: Debug - Verificar estructura de archivos
+        working-directory: ./Back/ms_expense/ms_expense
         run: |
-          cd ./Back/ms_expense/ms_expense
+          pwd
+          ls -la
+          echo "--- Buscando Dockerfile ---"
+          find . -name "Dockerfile*" -type f
+
+      - name: Build with Maven
+        working-directory: ./Back/ms_expense/ms_expense
+        run: |
           chmod +x ./mvnw
           ./mvnw clean package -DskipTests
 
