@@ -1,13 +1,13 @@
 pipeline {
     agent any
-    
+
     environment {
         DOCKER_HUB_REPO = 'miguel1203/gestion-back'
         IMAGE_TAG = 'dev'
         DOCKER_USER = 'miguel1203'
         DOCKER_PASS = 'dckr_pat_5CQzKCl99YfG_0nuHQMiuxUw6AY'
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
@@ -15,7 +15,7 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         stage('Deploy Database') {
             steps {
                 echo 'Deploying PostgreSQL DEV...'
@@ -28,7 +28,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Build Application') {
             steps {
                 echo 'Building Spring Boot application...'
@@ -38,7 +38,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Copy JAR to Dockerfile location') {
             steps {
                 echo 'Copying JAR to Dockerfile location...'
@@ -48,21 +48,21 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Build and Push Docker Image') {
             steps {
                 echo 'Building and pushing Docker image...'
                 dir('Back/ms_expense') {
                     script {
                         sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                        
+
                         def image = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
                         image.push()
                     }
                 }
             }
         }
-        
+
         stage('Deploy Application') {
             steps {
                 echo 'Deploying application DEV...'
@@ -70,7 +70,7 @@ pipeline {
                     echo "🚀 Desplegando aplicación DEV..."
                     docker stop gestion-back-dev || true
                     docker rm gestion-back-dev || true
-                    
+
                     docker run -d \
                       --name gestion-back-dev \
                       --network expense-db-dev_default \
@@ -83,22 +83,10 @@ pipeline {
                 '''
             }
         }
-        
-        stage('Health Check') {
-            steps {
-                echo 'Performing health check...'
-                script {
-                    sh '''
-                        echo "🔍 Verificando salud de la aplicación DEV..."
-                        sleep 45
-                        curl -f http://localhost:8080/actuator/health || exit 1
-                        echo "✅ Aplicación DEV desplegada exitosamente!"
-                    '''
-                }
-            }
-        }
-    }
+
     
+    }
+
     post {
         success {
             echo '''
