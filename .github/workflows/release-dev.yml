@@ -21,7 +21,7 @@ jobs:
 
       - name: Build backend (dev)
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/gestion-back:dev ./Back
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/gestion-back:dev ./Back/ms_expense
 
       - name: Push backend a Docker Hub (dev)
         run: |
