@@ -19,3 +19,6 @@ jobs:
 
       - name: Build with Maven (skip tests)
         run: ./mvnw clean package -DskipTests
+
+      - name: Compilar con Maven
+        run: mvn -B clean package -DskipTests
