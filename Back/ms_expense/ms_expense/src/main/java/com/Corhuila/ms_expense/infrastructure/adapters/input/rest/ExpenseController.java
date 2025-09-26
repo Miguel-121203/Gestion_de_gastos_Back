@@ -4,17 +4,17 @@ import com.Corhuila.ms_expense.domain.model.dto.ExpenseRequest;
 import com.Corhuila.ms_expense.domain.model.dto.ExpenseResponse;
 import com.Corhuila.ms_expense.domain.model.dto.ExpenseUpdateRequest;
 import com.Corhuila.ms_expense.domain.ports.ExpenseServicePort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,6 +23,7 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class ExpenseController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ExpenseController.class);
     private final ExpenseServicePort expenseServicePort;
 
     @Autowired
@@ -32,56 +33,62 @@ public class ExpenseController {
 
     @PostMapping
     public ResponseEntity<ExpenseResponse> createExpense(@Valid @RequestBody ExpenseRequest request) {
+        logger.info("Solicitud recibida para crear gasto - Usuario: {}, Monto: {}, Categoría: {}",
+                request.getUserId(), request.getAmount(), request.getExpenseCategoryId());
+
         ExpenseResponse response = expenseServicePort.createExpense(request);
+
+        logger.info("Gasto creado exitosamente con ID: {}", response.getExpenseId());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ExpenseResponse> getExpenseById(@PathVariable Long id) {
-        ExpenseResponse response = expenseServicePort.getExpenseById(id);
+    @PutMapping("/{id}")
+    public ResponseEntity<ExpenseResponse> updateExpense(
+            @PathVariable Long id,
+            @Valid @RequestBody ExpenseUpdateRequest request) {
+        logger.info("Solicitud recibida para actualizar gasto con ID: {}", id);
+
+        ExpenseResponse response = expenseServicePort.updateExpense(id, request);
+
+        logger.info("Respuesta enviada para gasto actualizado con ID: {}", response.getExpenseId());
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
+        logger.info("Solicitud recibida para eliminar gasto con ID: {}", id);
+
+        expenseServicePort.deleteExpense(id);
+
+        logger.info("Respuesta enviada - Gasto eliminado lógicamente con ID: {}", id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     public ResponseEntity<List<ExpenseResponse>> getAllExpenses() {
+        logger.info("Solicitud recibida para obtener todos los gastos");
+
         List<ExpenseResponse> responses = expenseServicePort.getAllExpenses();
+
+        logger.info("Respuesta enviada con {} gastos", responses.size());
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/paginated")
-    public ResponseEntity<Page<ExpenseResponse>> getAllExpensesPaginated(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "expenseDate") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
-
-        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-            Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<ExpenseResponse> responses = expenseServicePort.getAllExpenses(pageable);
-        return ResponseEntity.ok(responses);
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ExpenseResponse>> getExpensesByUserId(@PathVariable Long userId) {
-        List<ExpenseResponse> responses = expenseServicePort.getExpensesByUserId(userId);
-        return ResponseEntity.ok(responses);
-    }
-
-    @GetMapping("/user/{userId}/paginated")
-    public ResponseEntity<Page<ExpenseResponse>> getExpensesByUserIdPaginated(
+    @GetMapping("/user/{userId}/date-range")
+    public ResponseEntity<List<ExpenseResponse>> getExpensesByUserIdAndDateRange(
             @PathVariable Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "expenseDate") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
 
-        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-            Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
+        logger.info("Solicitud recibida para filtrar gastos por fecha - Usuario: {}, Rango: {} a {}",
+                userId, startDate, endDate);
 
-        Page<ExpenseResponse> responses = expenseServicePort.getExpensesByUserId(userId, pageable);
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+
+        List<ExpenseResponse> responses = expenseServicePort.getExpensesByUserIdAndDateRange(userId, startDateTime, endDateTime);
+
+        logger.info("Respuesta enviada con {} gastos filtrados por fecha para usuario: {}", responses.size(), userId);
         return ResponseEntity.ok(responses);
     }
 
@@ -89,44 +96,26 @@ public class ExpenseController {
     public ResponseEntity<List<ExpenseResponse>> getExpensesByUserIdAndCategory(
             @PathVariable Long userId,
             @PathVariable Long categoryId) {
+        logger.info("Solicitud recibida para filtrar gastos por categoría - Usuario: {}, Categoría: {}",
+                userId, categoryId);
+
         List<ExpenseResponse> responses = expenseServicePort.getExpensesByUserIdAndCategory(userId, categoryId);
+
+        logger.info("Respuesta enviada con {} gastos filtrados por categoría para usuario: {}", responses.size(), userId);
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/user/{userId}/date-range")
-    public ResponseEntity<List<ExpenseResponse>> getExpensesByUserIdAndDateRange(
+    @GetMapping("/user/{userId}/amount-range")
+    public ResponseEntity<List<ExpenseResponse>> getExpensesByUserIdAndAmountRange(
             @PathVariable Long userId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        List<ExpenseResponse> responses = expenseServicePort.getExpensesByUserIdAndDateRange(userId, startDate, endDate);
+            @RequestParam BigDecimal minAmount,
+            @RequestParam BigDecimal maxAmount) {
+        logger.info("Solicitud recibida para filtrar gastos por monto - Usuario: {}, Rango: {} a {}",
+                userId, minAmount, maxAmount);
+
+        List<ExpenseResponse> responses = expenseServicePort.getExpensesByUserIdAndAmountRange(userId, minAmount, maxAmount);
+
+        logger.info("Respuesta enviada con {} gastos filtrados por monto para usuario: {}", responses.size(), userId);
         return ResponseEntity.ok(responses);
-    }
-
-    @GetMapping("/user/{userId}/tag/{tag}")
-    public ResponseEntity<List<ExpenseResponse>> getExpensesByUserIdAndTag(
-            @PathVariable Long userId,
-            @PathVariable String tag) {
-        List<ExpenseResponse> responses = expenseServicePort.getExpensesByUserIdAndTag(userId, tag);
-        return ResponseEntity.ok(responses);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ExpenseResponse> updateExpense(
-            @PathVariable Long id,
-            @Valid @RequestBody ExpenseUpdateRequest request) {
-        ExpenseResponse response = expenseServicePort.updateExpense(id, request);
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
-        expenseServicePort.deleteExpense(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/user/{userId}/count")
-    public ResponseEntity<Long> countExpensesByUserId(@PathVariable Long userId) {
-        long count = expenseServicePort.countExpensesByUserId(userId);
-        return ResponseEntity.ok(count);
     }
 }

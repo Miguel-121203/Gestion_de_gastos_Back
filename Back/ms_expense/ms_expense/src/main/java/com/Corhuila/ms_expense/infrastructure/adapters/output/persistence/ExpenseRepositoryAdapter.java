@@ -3,10 +3,9 @@ package com.Corhuila.ms_expense.infrastructure.adapters.output.persistence;
 import com.Corhuila.ms_expense.domain.model.Expense;
 import com.Corhuila.ms_expense.domain.ports.ExpenseRepositoryPort;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,57 +26,29 @@ public class ExpenseRepositoryAdapter implements ExpenseRepositoryPort {
     }
 
     @Override
-    public Optional<Expense> findById(Long id) {
-        return expenseRepository.findById(id);
+    public Optional<Expense> findByIdAndActiveTrue(Long id) {
+        return expenseRepository.findByExpenseIdAndActiveTrue(id);
     }
 
     @Override
-    public List<Expense> findAll() {
-        return expenseRepository.findAll();
+    public List<Expense> findAllActive() {
+        return expenseRepository.findAll().stream()
+                .filter(Expense::getActive)
+                .toList();
     }
 
     @Override
-    public Page<Expense> findAll(Pageable pageable) {
-        return expenseRepository.findAll(pageable);
+    public List<Expense> findByUserIdAndExpenseCategoryIdAndActiveTrue(Long userId, Long categoryId) {
+        return expenseRepository.findByUserIdAndExpenseCategoryIdAndActiveTrue(userId, categoryId);
     }
 
     @Override
-    public List<Expense> findByUserId(Long userId) {
-        return expenseRepository.findByUserId(userId);
+    public List<Expense> findByUserIdAndExpenseDateBetweenAndActiveTrue(Long userId, LocalDateTime startDate, LocalDateTime endDate) {
+        return expenseRepository.findByUserIdAndExpenseDateBetweenAndActiveTrue(userId, startDate, endDate);
     }
 
     @Override
-    public Page<Expense> findByUserId(Long userId, Pageable pageable) {
-        return expenseRepository.findByUserId(userId, pageable);
-    }
-
-    @Override
-    public List<Expense> findByUserIdAndExpenseCategoryId(Long userId, Long categoryId) {
-        return expenseRepository.findByUserIdAndExpenseCategoryId(userId, categoryId);
-    }
-
-    @Override
-    public List<Expense> findByUserIdAndExpenseDateBetween(Long userId, LocalDateTime startDate, LocalDateTime endDate) {
-        return expenseRepository.findByUserIdAndExpenseDateBetween(userId, startDate, endDate);
-    }
-
-    @Override
-    public List<Expense> findByUserIdAndTagsContaining(Long userId, String tag) {
-        return expenseRepository.findByUserIdAndTagsContaining(userId, tag);
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        expenseRepository.deleteById(id);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return expenseRepository.existsById(id);
-    }
-
-    @Override
-    public long countByUserId(Long userId) {
-        return expenseRepository.countByUserId(userId);
+    public List<Expense> findByUserIdAndAmountBetweenAndActiveTrue(Long userId, BigDecimal minAmount, BigDecimal maxAmount) {
+        return expenseRepository.findByUserIdAndAmountBetweenAndActiveTrue(userId, minAmount, maxAmount);
     }
 }
