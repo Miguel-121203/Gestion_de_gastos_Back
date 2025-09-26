@@ -1,6 +1,8 @@
 name: Release DB Dev
 
 on:
+  push:
+    branches: ["dev"]
   workflow_dispatch: # Solo se ejecuta manualmente
 
 jobs:
