@@ -1,0 +1,81 @@
+name: Deploy PDN
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  deploy-pdn:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      # Deploy Database
+      - name: Deploy PostgreSQL PDN
+        working-directory: ./DB
+        run: |
+          echo "🚀 Desplegando PostgreSQL PDN..."
+          docker compose -f docker-compose-pdn.yml -p expense-db-pdn up -d
+          sleep 30
+
+      # Build Application
+      - name: Build with Maven
+        working-directory: ./Back/ms_expense/ms_expense
+        run: |
+          chmod +x ./mvnw
+          ./mvnw clean package -DskipTests
+
+      - name: Copy JAR to Dockerfile location
+        run: |
+          mkdir -p ./Back/ms_expense/target
+          cp ./Back/ms_expense/ms_expense/target/*.jar ./Back/ms_expense/target/
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Image PDN
+        working-directory: ./Back/ms_expense
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/gestion-back:pdn .
+          docker push ${{ secrets.DOCKER_USERNAME }}/gestion-back:pdn
+
+      # Deploy Application
+      - name: Deploy Application PDN
+        run: |
+          echo "🚀 Desplegando aplicación PDN..."
+          docker stop gestion-back-pdn || true
+          docker rm gestion-back-pdn || true
+
+          docker run -d \
+            --name gestion-back-pdn \
+            --network expense-db-pdn_default \
+            -p 8082:8080 \
+            -e SPRING_PROFILES_ACTIVE=pdn \
+            -e SPRING_DATASOURCE_URL="jdbc:postgresql://postgres-expense-pdn:5432/expense_db_pdn" \
+            -e SPRING_DATASOURCE_USERNAME=postgres \
+            -e SPRING_DATASOURCE_PASSWORD=${POSTGRES_PDN_PASSWORD:-pdn123456} \
+            ${{ secrets.DOCKER_USERNAME }}/gestion-back:pdn
+
+      - name: Health Check PDN
+        run: |
+          echo "🔍 Verificando salud de la aplicación PDN..."
+          sleep 45
+          curl -f http://localhost:8082/actuator/health || exit 1
+          echo "✅ Aplicación PDN desplegada exitosamente!"
