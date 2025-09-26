@@ -18,8 +18,5 @@ jobs:
           java-version: "17"
 
       - name: Build with Maven (skip tests)
-        run: ./mvnw clean package -DskipTests
-
-      - name: Compilar con Maven Wrapper
         working-directory: Back/ms_expense/ms_expense
         run: ./mvnw clean package -DskipTests
