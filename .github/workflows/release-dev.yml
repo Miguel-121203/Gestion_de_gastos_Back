@@ -21,13 +21,12 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: Debug - Verificar estructura de archivos
-        working-directory: ./Back/ms_expense/ms_expense
+      - name: Debug - Verificar archivos
         run: |
-          pwd
-          ls -la
-          echo "--- Buscando Dockerfile ---"
+          echo "=== BUSCANDO DOCKERFILES ==="
           find . -name "Dockerfile*" -type f
+          echo "=== ESTRUCTURA CARPETAS ==="
+          ls -la ./Back/ms_expense/ms_expense/ || echo "Carpeta no existe"
 
       - name: Build with Maven
         working-directory: ./Back/ms_expense/ms_expense
@@ -43,9 +42,7 @@ jobs:
 
       - name: Build backend (dev)
         working-directory: ./Back/ms_expense/ms_expense
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/gestion-back:dev .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/gestion-back:dev .
 
       - name: Push backend a Docker Hub (dev)
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/gestion-back:dev
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/gestion-back:dev
