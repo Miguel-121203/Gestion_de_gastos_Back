@@ -1,0 +1,12 @@
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\application\usecases\ExpenseUseCase.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\domain\model\dto\ExpenseRequest.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\domain\model\dto\ExpenseResponse.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\domain\model\dto\ExpenseUpdateRequest.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\domain\model\Expense.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\domain\ports\ExpenseRepositoryPort.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\domain\ports\ExpenseServicePort.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\infrastructure\adapters\input\rest\ExpenseController.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\infrastructure\adapters\output\persistence\ExpenseRepository.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\infrastructure\adapters\output\persistence\ExpenseRepositoryAdapter.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\infrastructure\configuration\BeanConfiguration.java
+C:\Users\migue\OneDrive\Documents\UNIVERSIDAD\8vo semestre\Sistemas distribuidos\Gestion_de_gastos_Back\Back\ms_expense\ms_expense\src\main\java\com\Corhuila\ms_expense\MsExpenseApplication.java
