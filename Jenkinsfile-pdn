@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_HUB_REPO = 'miguel1203/gestion-back'
-        IMAGE_TAG = 'prod'
+        IMAGE_TAG = 'pdn'
         DOCKER_USER = 'miguel1203'
         DOCKER_PASS = 'dckr_pat_5CQzKCl99YfG_0nuHQMiuxUw6AY'
     }
@@ -18,11 +18,11 @@ pipeline {
 
         stage('Deploy Database') {
             steps {
-                echo 'Deploying PostgreSQL PROD...'
+                echo 'Deploying PostgreSQL PDN...'
                 dir('DB') {
                     sh '''
-                        echo "🚀 Desplegando PostgreSQL PROD..."
-                        docker compose -f docker-compose-prod.yml -p expense-db-prod up -d
+                        echo "🚀 Desplegando PostgreSQL PDN..."
+                        docker compose -f docker-compose-pdn.yml -p expense-db-pdn up -d
                         sleep 30
                     '''
                 }
@@ -65,20 +65,20 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                echo 'Deploying application PROD...'
+                echo 'Deploying application PDN...'
                 sh '''
-                    echo "🚀 Desplegando aplicación PROD..."
-                    docker stop gestion-back-prod || true
-                    docker rm gestion-back-prod || true
+                    echo "🚀 Desplegando aplicación PDN..."
+                    docker stop gestion-back-pdn || true
+                    docker rm gestion-back-pdn || true
 
                     docker run -d \
-                      --name gestion-back-prod \
-                      --network expense-db-prod_default \
+                      --name gestion-back-pdn \
+                      --network expense-db-pdn_default \
                       -p 8082:8080 \
-                      -e SPRING_PROFILES_ACTIVE=prod \
-                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://postgres-expense-prod:5432/expense_db_prod" \
+                      -e SPRING_PROFILES_ACTIVE=pdn \
+                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://postgres-expense-pdn:5432/expense_db_pdn" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
-                      -e SPRING_DATASOURCE_PASSWORD=prod123456 \
+                      -e SPRING_DATASOURCE_PASSWORD=pdn123456 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
                 '''
             }
@@ -105,9 +105,9 @@ pipeline {
             echo 'Deployment failed! Checking logs...'
             sh '''
                 echo "Application logs:"
-                docker logs gestion-back-prod || echo "No application logs available"
+                docker logs gestion-back-pdn || echo "No application logs available"
                 echo "Database logs:"
-                docker logs postgres-expense-prod || echo "No database logs available"
+                docker logs postgres-expense-pdn || echo "No database logs available"
             '''
         }
         always {
