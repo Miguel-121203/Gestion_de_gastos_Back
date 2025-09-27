@@ -1,0 +1,16 @@
+com\Corhuila\ms_expense\application\usecases\ExpenseUseCase.class
+com\Corhuila\ms_expense\infrastructure\adapters\output\persistence\ExpenseRepository.class
+com\Corhuila\ms_expense\domain\model\dto\ExpenseResponse$ExpenseResponseBuilder.class
+com\Corhuila\ms_expense\domain\model\dto\ExpenseResponse.class
+com\Corhuila\ms_expense\domain\ports\ExpenseRepositoryPort.class
+com\Corhuila\ms_expense\domain\ports\ExpenseServicePort.class
+com\Corhuila\ms_expense\MsExpenseApplication.class
+com\Corhuila\ms_expense\domain\model\dto\ExpenseRequest.class
+com\Corhuila\ms_expense\domain\model\dto\ExpenseUpdateRequest$ExpenseUpdateRequestBuilder.class
+com\Corhuila\ms_expense\infrastructure\adapters\input\rest\ExpenseController.class
+com\Corhuila\ms_expense\domain\model\Expense.class
+com\Corhuila\ms_expense\domain\model\dto\ExpenseUpdateRequest.class
+com\Corhuila\ms_expense\domain\model\dto\ExpenseRequest$ExpenseRequestBuilder.class
+com\Corhuila\ms_expense\infrastructure\adapters\output\persistence\ExpenseRepositoryAdapter.class
+com\Corhuila\ms_expense\domain\model\Expense$ExpenseBuilder.class
+com\Corhuila\ms_expense\infrastructure\configuration\BeanConfiguration.class
