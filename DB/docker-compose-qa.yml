@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres-qa:
+    image: postgres:15
+    container_name: postgres-expense-qa
+    environment:
+      POSTGRES_DB: expense_db_qa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qa123456
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_qa_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_qa_data:

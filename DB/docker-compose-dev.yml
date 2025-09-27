@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres-dev:
+    image: postgres:15
+    container_name: postgres-expense-dev
+    environment:
+      POSTGRES_DB: expense_db_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dev123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_dev_data:
