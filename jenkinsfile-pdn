@@ -1,0 +1,125 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB_REPO = 'miguel1203/gestion-back'
+        IMAGE_TAG = 'pdn'
+        DOCKER_USER = 'miguel1203'
+        DOCKER_PASS = 'dckr_pat_5CQzKCl99YfG_0nuHQMiuxUw6AY'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code...'
+                checkout scm
+            }
+        }
+
+        stage('Deploy Database') {
+            steps {
+                echo 'Deploying PostgreSQL PDN...'
+                dir('DB') {
+                    sh '''
+                        echo "🚀 Desplegando PostgreSQL PDN..."
+                        docker compose -f docker-compose-pdn.yml -p expense-db-pdn up -d
+                        sleep 30
+                    '''
+                }
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                echo 'Building Spring Boot application...'
+                dir('Back/ms_expense/ms_expense') {
+                    sh '''
+                        # Verificar si mvnw existe, si no, usar maven del sistema
+                        if [ -f "./mvnw" ]; then
+                            chmod +x ./mvnw
+                            ./mvnw clean package -DskipTests
+                        else
+                            echo "mvnw not found, using system maven"
+                            mvn clean package -DskipTests
+                        fi
+                    '''
+                }
+            }
+        }
+
+        stage('Copy JAR to Dockerfile location') {
+            steps {
+                echo 'Copying JAR to Dockerfile location...'
+                sh '''
+                    mkdir -p ./Back/ms_expense/target
+                    cp ./Back/ms_expense/ms_expense/target/*.jar ./Back/ms_expense/target/
+                '''
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                echo 'Building and pushing Docker image...'
+                dir('Back/ms_expense') {
+                    script {
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+
+                        def image = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
+                        image.push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                echo 'Deploying application PDN...'
+                sh '''
+                    echo "🚀 Desplegando aplicación PDN..."
+                    docker stop gestion-back-pdn || true
+                    docker rm gestion-back-pdn || true
+
+                    docker run -d \
+                      --name gestion-back-pdn \
+                      --network expense-db-pdn_default \
+                      -p 8082:8080 \
+                      -e SPRING_PROFILES_ACTIVE=pdn \
+                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://postgres-expense-pdn:5432/expense_db_pdn" \
+                      -e SPRING_DATASOURCE_USERNAME=postgres \
+                      -e SPRING_DATASOURCE_PASSWORD=pdn123456 \
+                      ${DOCKER_HUB_REPO}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo 'Pipeline execution completed.'
+            echo '''
+
+            ========================================
+            ✅ DEPLOYMENT SUCCESSFUL!
+            ========================================
+            🌐 Application: http://localhost:8082
+            🔍 Health Check: http://localhost:8082/actuator/health
+            📊 Metrics: http://localhost:8082/actuator/metrics
+            🗄️ Database: localhost:5434
+            ========================================
+            '''
+        }
+        failure {
+            echo 'Deployment failed! Checking logs...'
+            sh '''
+                echo "Application logs:"
+                docker logs gestion-back-pdn || echo "No application logs available"
+                echo "Database logs:"
+                docker logs postgres-expense-pdn || echo "No database logs available"
+            '''
+        }
+        always {
+            echo 'Pipeline execution completed.'
+        }
+    }
+}
