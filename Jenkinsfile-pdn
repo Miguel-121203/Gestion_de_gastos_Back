@@ -33,8 +33,16 @@ pipeline {
             steps {
                 echo 'Building Spring Boot application...'
                 dir('Back/ms_expense/ms_expense') {
-                    sh 'chmod +x ./mvnw'
-                    sh './mvnw clean package -DskipTests'
+                    sh '''
+                        # Verificar si mvnw existe, si no, usar maven del sistema
+                        if [ -f "./mvnw" ]; then
+                            chmod +x ./mvnw
+                            ./mvnw clean package -DskipTests
+                        else
+                            echo "mvnw not found, using system maven"
+                            mvn clean package -DskipTests
+                        fi
+                    '''
                 }
             }
         }
