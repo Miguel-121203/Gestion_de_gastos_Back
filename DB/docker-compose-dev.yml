@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres-dev:
     image: postgres:15
-    container_name: postgres-gestion-gastos-dev
+    container_name: DataBase-dev
     environment:
       POSTGRES_DB: gestion_gastos_dev
       POSTGRES_USER: postgres

@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = 'miguel1203/gestion-income'
-        IMAGE_TAG = 'dev'
+        DOCKER_HUB_REPO = 'miguel1203/gestion-expense'
+        IMAGE_TAG = 'qa'
         DOCKER_USER = 'miguel1203'
         DOCKER_PASS = 'dckr_pat_5CQzKCl99YfG_0nuHQMiuxUw6AY'
     }
@@ -18,11 +18,11 @@ pipeline {
 
         stage('Deploy Database') {
             steps {
-                echo 'Deploying PostgreSQL DEV...'
+                echo 'Deploying PostgreSQL QA...'
                 dir('DB') {
                     sh '''
-                        echo "🚀 Desplegando PostgreSQL DEV..."
-                        docker compose -f docker-compose-dev.yml -p gestion-gastos-dev up -d
+                        echo "🚀 Desplegando PostgreSQL QA..."
+                        docker compose -f docker-compose-qa.yml -p gestion-gastos-qa up -d
                         sleep 30
                     '''
                 }
@@ -31,8 +31,8 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                echo 'Building Spring Boot Income Service...'
-                dir('Back/ms_income') {
+                echo 'Building Spring Boot Expense Service...'
+                dir('Back/ms_expense/ms_expense') {
                     sh 'chmod +x ./mvnw'
                     sh './mvnw clean package -DskipTests'
                 }
@@ -43,16 +43,16 @@ pipeline {
             steps {
                 echo 'Copying JAR to Dockerfile location...'
                 sh '''
-                    mkdir -p ./Back/ms_income/target
-                    cp ./Back/ms_income/target/*.jar ./Back/ms_income/target/ || echo "JAR already in correct location"
+                    mkdir -p ./Back/ms_expense/target
+                    cp ./Back/ms_expense/ms_expense/target/*.jar ./Back/ms_expense/target/
                 '''
             }
         }
 
         stage('Build and Push Docker Image') {
             steps {
-                echo 'Building and pushing Docker image for Income Service...'
-                dir('Back/ms_income') {
+                echo 'Building and pushing Docker image for Expense Service...'
+                dir('Back/ms_expense') {
                     script {
                         sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
 
@@ -65,21 +65,20 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                echo 'Deploying Income Service DEV...'
+                echo 'Deploying Expense Service QA...'
                 sh '''
-                    echo "🚀 Desplegando Income Service DEV..."
-                    docker stop ms_income-dev || true
-                    docker rm ms_income-dev || true
+                    echo "🚀 Desplegando Expense Service QA..."
+                    docker stop ms_expense-qa || true
+                    docker rm ms_expense-qa || true
 
                     docker run -d \
-                      --name ms_income-dev \
-                      --network gestion-gastos-dev_default \
-                      -p 8100:8100 \
-                      -e SPRING_PROFILES_ACTIVE=dev \
-                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-dev:5432/gestion_gastos_dev" \
+                      --name ms_expense-qa \
+                      --network gestion-gastos-qa_default \
+                      -p 8081:8080 \
+                      -e SPRING_PROFILES_ACTIVE=qa \
+                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-qa:5432/gestion_gastos_qa" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
-                      -e SPRING_DATASOURCE_PASSWORD=dev123456 \
-                      -e SERVER_PORT=8100 \
+                      -e SPRING_DATASOURCE_PASSWORD=qa123456 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
                 '''
             }
@@ -92,22 +91,22 @@ pipeline {
         success {
             echo '''
             ========================================
-            ✅ INCOME SERVICE DEPLOYMENT SUCCESSFUL!
+            ✅ EXPENSE SERVICE QA DEPLOYMENT SUCCESSFUL!
             ========================================
-            🌐 Application: http://localhost:8100
-            🔍 Health Check: http://localhost:8100/actuator/health
-            📊 Metrics: http://localhost:8100/actuator/metrics
-            🗄️ Database: localhost:5432 (gestion_gastos_dev)
+            🌐 Application: http://localhost:8081
+            🔍 Health Check: http://localhost:8081/actuator/health
+            📊 Metrics: http://localhost:8081/actuator/metrics
+            🗄️ Database: localhost:5432 (gestion_gastos_qa)
             ========================================
             '''
         }
         failure {
-            echo 'Income Service deployment failed! Checking logs...'
+            echo 'Expense Service QA deployment failed! Checking logs...'
             sh '''
                 echo "Application logs:"
-                docker logs ms_income-dev || echo "No application logs available"
+                docker logs ms_expense-qa || echo "No application logs available"
                 echo "Database logs:"
-                docker logs DataBase-dev || echo "No database logs available"
+                docker logs DataBase-qa || echo "No database logs available"
             '''
         }
         always {

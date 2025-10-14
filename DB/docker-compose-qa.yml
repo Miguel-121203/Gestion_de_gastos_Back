@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres-qa:
     image: postgres:15
-    container_name: postgres-expense-qa
+    container_name: DataBase-qa
     environment:
       POSTGRES_DB: expense_db_qa
       POSTGRES_USER: postgres
