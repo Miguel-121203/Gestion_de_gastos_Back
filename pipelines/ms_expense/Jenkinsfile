@@ -68,15 +68,15 @@ pipeline {
                 echo 'Deploying Expense Service DEV...'
                 sh '''
                     echo "🚀 Desplegando Expense Service DEV..."
-                    docker stop gestion-expense-dev || true
-                    docker rm gestion-expense-dev || true
+                    docker stop ms_expense-dev || true
+                    docker rm ms_expense-dev || true
 
                     docker run -d \
-                      --name gestion-expense-dev \
+                      --name ms_expense-dev \
                       --network gestion-gastos-dev_default \
                       -p 8080:8080 \
                       -e SPRING_PROFILES_ACTIVE=dev \
-                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://postgres-gestion-gastos-dev:5432/gestion_gastos_dev" \
+                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-dev:5432/gestion_gastos_dev" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
                       -e SPRING_DATASOURCE_PASSWORD=dev123456 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
@@ -104,9 +104,9 @@ pipeline {
             echo 'Expense Service deployment failed! Checking logs...'
             sh '''
                 echo "Application logs:"
-                docker logs gestion-expense-dev || echo "No application logs available"
+                docker logs ms_expense-dev || echo "No application logs available"
                 echo "Database logs:"
-                docker logs postgres-gestion-gastos-dev || echo "No database logs available"
+                docker logs DataBase-dev || echo "No database logs available"
             '''
         }
         always {
