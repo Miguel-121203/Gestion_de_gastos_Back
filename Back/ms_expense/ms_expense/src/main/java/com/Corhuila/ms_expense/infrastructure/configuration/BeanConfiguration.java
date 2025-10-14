@@ -1,5 +1,7 @@
 package com.Corhuila.ms_expense.infrastructure.configuration;
 
+import com.Corhuila.ms_expense.application.services.ExportService;
+import com.Corhuila.ms_expense.domain.ports.ExportServicePort;
 import com.Corhuila.ms_expense.domain.ports.ExpenseRepositoryPort;
 import com.Corhuila.ms_expense.domain.ports.ExpenseServicePort;
 import com.Corhuila.ms_expense.application.usecases.ExpenseUseCase;
@@ -12,5 +14,10 @@ public class BeanConfiguration {
     @Bean
     public ExpenseServicePort expenseServicePort(ExpenseRepositoryPort expenseRepositoryPort) {
         return new ExpenseUseCase(expenseRepositoryPort);
+    }
+
+    @Bean
+    public ExportServicePort exportServicePort() {
+        return new ExportService();
     }
 }
