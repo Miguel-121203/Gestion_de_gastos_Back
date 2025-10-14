@@ -3,15 +3,16 @@ version: '3.8'
 services:
   postgres-pdn:
     image: postgres:15
-    container_name: postgres-expense-pdn
+    container_name: DataBase-pdn
     environment:
-      POSTGRES_DB: expense_db_pdn
+      POSTGRES_DB: gestion_gastos_pdn
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PDN_PASSWORD:-pdn123456}
     ports:
       - "5434:5432"
     volumes:
       - postgres_pdn_data:/var/lib/postgresql/data
+      - ./init-pdn.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
   postgres_pdn_data:

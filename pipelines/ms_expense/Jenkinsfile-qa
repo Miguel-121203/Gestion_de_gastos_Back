@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = 'miguel1203/gestion-back'
-        IMAGE_TAG = 'pdn'
+        DOCKER_HUB_REPO = 'miguel1203/gestion-expense'
+        IMAGE_TAG = 'qa'
         DOCKER_USER = 'miguel1203'
         DOCKER_PASS = 'dckr_pat_5CQzKCl99YfG_0nuHQMiuxUw6AY'
     }
@@ -18,11 +18,11 @@ pipeline {
 
         stage('Deploy Database') {
             steps {
-                echo 'Deploying PostgreSQL PDN...'
+                echo 'Deploying PostgreSQL QA...'
                 dir('DB') {
                     sh '''
-                        echo "🚀 Desplegando PostgreSQL PDN..."
-                        docker compose -f docker-compose-pdn.yml -p expense-db-pdn up -d
+                        echo "🚀 Desplegando PostgreSQL QA..."
+                        docker compose -f docker-compose-qa.yml -p gestion-gastos-qa up -d
                         sleep 30
                     '''
                 }
@@ -31,18 +31,10 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                echo 'Building Spring Boot application...'
+                echo 'Building Spring Boot Expense Service...'
                 dir('Back/ms_expense/ms_expense') {
-                    sh '''
-                        # Verificar si mvnw existe, si no, usar maven del sistema
-                        if [ -f "./mvnw" ]; then
-                            chmod +x ./mvnw
-                            ./mvnw clean package -DskipTests
-                        else
-                            echo "mvnw not found, using system maven"
-                            mvn clean package -DskipTests
-                        fi
-                    '''
+                    sh 'chmod +x ./mvnw'
+                    sh './mvnw clean package -DskipTests'
                 }
             }
         }
@@ -59,7 +51,7 @@ pipeline {
 
         stage('Build and Push Docker Image') {
             steps {
-                echo 'Building and pushing Docker image...'
+                echo 'Building and pushing Docker image for Expense Service...'
                 dir('Back/ms_expense') {
                     script {
                         sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
@@ -73,49 +65,48 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                echo 'Deploying application PDN...'
+                echo 'Deploying Expense Service QA...'
                 sh '''
-                    echo "🚀 Desplegando aplicación PDN..."
-                    docker stop gestion-back-pdn || true
-                    docker rm gestion-back-pdn || true
+                    echo "🚀 Desplegando Expense Service QA..."
+                    docker stop ms_expense-qa || true
+                    docker rm ms_expense-qa || true
 
                     docker run -d \
-                      --name gestion-back-pdn \
-                      --network expense-db-pdn_default \
-                      -p 8082:8080 \
-                      -e SPRING_PROFILES_ACTIVE=pdn \
-                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://postgres-expense-pdn:5432/expense_db_pdn" \
+                      --name ms_expense-qa \
+                      --network gestion-gastos-qa_default \
+                      -p 8081:8080 \
+                      -e SPRING_PROFILES_ACTIVE=qa \
+                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-qa:5432/gestion_gastos_qa" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
-                      -e SPRING_DATASOURCE_PASSWORD=pdn123456 \
+                      -e SPRING_DATASOURCE_PASSWORD=qa123456 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
                 '''
             }
         }
 
+
     }
 
     post {
         success {
-            echo 'Pipeline execution completed.'
             echo '''
-
             ========================================
-            ✅ DEPLOYMENT SUCCESSFUL!
+            ✅ EXPENSE SERVICE QA DEPLOYMENT SUCCESSFUL!
             ========================================
-            🌐 Application: http://localhost:8082
-            🔍 Health Check: http://localhost:8082/actuator/health
-            📊 Metrics: http://localhost:8082/actuator/metrics
-            🗄️ Database: localhost:5434
+            🌐 Application: http://localhost:8081
+            🔍 Health Check: http://localhost:8081/actuator/health
+            📊 Metrics: http://localhost:8081/actuator/metrics
+            🗄️ Database: localhost:5432 (gestion_gastos_qa)
             ========================================
             '''
         }
         failure {
-            echo 'Deployment failed! Checking logs...'
+            echo 'Expense Service QA deployment failed! Checking logs...'
             sh '''
                 echo "Application logs:"
-                docker logs gestion-back-pdn || echo "No application logs available"
+                docker logs ms_expense-qa || echo "No application logs available"
                 echo "Database logs:"
-                docker logs postgres-expense-pdn || echo "No database logs available"
+                docker logs DataBase-qa || echo "No database logs available"
             '''
         }
         always {
