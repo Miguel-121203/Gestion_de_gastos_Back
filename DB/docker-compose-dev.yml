@@ -3,16 +3,15 @@ version: '3.8'
 services:
   postgres-dev:
     image: postgres:15
-    container_name: postgres-gestion-gastos-dev
+    container_name: postgres-expense-dev
     environment:
-      POSTGRES_DB: gestion_gastos_dev
+      POSTGRES_DB: expense_db_dev
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: dev123456
     ports:
       - "5432:5432"
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
-      - ./init-dev.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
   postgres_dev_data:
