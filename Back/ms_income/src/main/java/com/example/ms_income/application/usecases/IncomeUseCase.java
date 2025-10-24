@@ -1,11 +1,15 @@
 package com.example.ms_income.application.usecases;
 
 import com.example.ms_income.domain.model.Income;
+import com.example.ms_income.domain.model.dto.CategoryInfo;
 import com.example.ms_income.domain.model.dto.IncomeResponse;
 import com.example.ms_income.domain.model.dto.IncomeRequest;
 import com.example.ms_income.domain.model.dto.IncomeUpdateRequest;
 import com.example.ms_income.domain.ports.IncomeRepositoryPort;
 import com.example.ms_income.domain.ports.IncomeServicePort;
+import com.example.ms_income.infrastructure.adapters.output.external.CategoryClient;
+import com.example.ms_income.infrastructure.adapters.output.external.CategoryResponse;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,22 +25,30 @@ public class IncomeUseCase implements IncomeServicePort {
 
     private static final Logger logger = LoggerFactory.getLogger(IncomeUseCase.class);
     private final IncomeRepositoryPort incomeRepositoryPort;
+    private final CategoryClient categoryClient;
 
     @Autowired
-    public IncomeUseCase(IncomeRepositoryPort incomeRepositoryPort) {
+    public IncomeUseCase(IncomeRepositoryPort incomeRepositoryPort, CategoryClient categoryClient) {
         this.incomeRepositoryPort = incomeRepositoryPort;
+        this.categoryClient = categoryClient;
     }
 
     @Override
     public IncomeResponse createIncome(IncomeRequest request) {
         logger.info("Iniciando creación de ingreso para usuario: {} con monto: {}", request.getUserId(), request.getAmount());
 
+
+        if (!categoryClient.validateExpenseCategoryExists(request.getIncomeCategoryId())){
+            logger.info("Iniciando creacion de Ingreso para usuario: {} con monto: {}", request.getUserId(), request.getAmount());
+
+            throw new RuntimeException("la categoria con ID " + request.getIncomeCategoryId() + " no existe, no esta activa o no es de tipo INCOME");
+        }
+
         Income income = Income.builder()
                 .incomeDate(request.getIncomeDate().atStartOfDay())
                 .amount(request.getAmount())
                 .incomeCategoryId(request.getIncomeCategoryId())
                 .description(request.getDescription())
-                .additionalNotes(request.getAdditionalNotes())
                 .userId(request.getUserId())
                 .active(true)
                 .createdAt(LocalDateTime.now())
@@ -116,16 +128,17 @@ public class IncomeUseCase implements IncomeServicePort {
             income.setAmount(request.getAmount());
         }
         if (request.getIncomeCategoryId() != null) {
+            if (!categoryClient.validateExpenseCategoryExists(request.getIncomeCategoryId())) {
+                logger.error("Categoría inválida con ID: {}", request.getIncomeCategoryId());
+                throw new RuntimeException("La categoría con ID " + request.getIncomeCategoryId() +
+                        " no existe, no está activa o no es de tipo EXPENSE");
+            }
             logger.info("Actualizando categoría de {} a {}", income.getIncomeCategoryId(), request.getIncomeCategoryId());
             income.setIncomeCategoryId(request.getIncomeCategoryId());
         }
         if (request.getDescription() != null) {
             logger.info("Actualizando descripción del ingreso");
             income.setDescription(request.getDescription());
-        }
-        if (request.getAdditionalNotes() != null) {
-            logger.info("Actualizando notas adicionales del ingreso");
-            income.setAdditionalNotes(request.getAdditionalNotes());
         }
         income.setUpdatedAt(LocalDateTime.now());
 
@@ -153,13 +166,33 @@ public class IncomeUseCase implements IncomeServicePort {
     }
 
     private IncomeResponse mapToResponse(Income income) {
+        // Obtener información de la categoría
+        CategoryInfo categoryInfo = null;
+        try {
+            CategoryResponse categoryResponse = categoryClient.getCategoryById(income.getIncomeCategoryId());
+            if (categoryResponse != null) {
+                categoryInfo = CategoryInfo.builder()
+                        .name(categoryResponse.getName())
+                        .description(categoryResponse.getDescription())
+                        .type(categoryResponse.getType() != null ? categoryResponse.getType().toString() : null)
+                        .build();
+                logger.debug("Información de categoría obtenida para el gasto ID: {}", income.getIncomeId());
+            } else {
+                logger.warn("No se pudo obtener información de la categoría ID: {} para el gasto ID: {}",
+                        income.getIncomeCategoryId(), income.getIncomeId());
+            }
+        } catch (Exception e) {
+            logger.error("Error al obtener información de la categoría ID: {} para el gasto ID: {}",
+                    income.getIncomeCategoryId(), income.getIncomeCategoryId(), e);
+        }
+
+
         return IncomeResponse.builder()
                 .incomeId(income.getIncomeId())
                 .incomeDate(income.getIncomeDate())
                 .amount(income.getAmount())
-                .incomeCategoryId(income.getIncomeCategoryId())
+                .category(categoryInfo)
                 .description(income.getDescription())
-                .additionalNotes(income.getAdditionalNotes())
                 .userId(income.getUserId())
                 .active(income.getActive())
                 .createdAt(income.getCreatedAt())

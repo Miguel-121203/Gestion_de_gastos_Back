@@ -1,11 +1,14 @@
 package com.Corhuila.ms_expense.application.usecases;
 
 import com.Corhuila.ms_expense.domain.model.Expense;
+import com.Corhuila.ms_expense.domain.model.dto.CategoryInfo;
 import com.Corhuila.ms_expense.domain.model.dto.ExpenseResponse;
 import com.Corhuila.ms_expense.domain.model.dto.ExpenseRequest;
 import com.Corhuila.ms_expense.domain.model.dto.ExpenseUpdateRequest;
 import com.Corhuila.ms_expense.domain.ports.ExpenseRepositoryPort;
 import com.Corhuila.ms_expense.domain.ports.ExpenseServicePort;
+import com.Corhuila.ms_expense.infrastructure.adapters.output.external.CategoryClient;
+import com.Corhuila.ms_expense.infrastructure.adapters.output.external.CategoryResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +24,24 @@ public class ExpenseUseCase implements ExpenseServicePort {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpenseUseCase.class);
     private final ExpenseRepositoryPort expenseRepositoryPort;
+    private final CategoryClient categoryClient;
 
     @Autowired
-    public ExpenseUseCase(ExpenseRepositoryPort expenseRepositoryPort) {
+    public ExpenseUseCase(ExpenseRepositoryPort expenseRepositoryPort, CategoryClient categoryClient) {
         this.expenseRepositoryPort = expenseRepositoryPort;
+        this.categoryClient = categoryClient;
     }
 
     @Override
     public ExpenseResponse createExpense(ExpenseRequest request) {
         logger.info("Iniciando creación de gasto para usuario: {} con monto: {}", request.getUserId(), request.getAmount());
+
+        // Validar que la categoría existe y es de tipo EXPENSE
+        if (!categoryClient.validateExpenseCategoryExists(request.getExpenseCategoryId())) {
+            logger.error("Categoría inválida con ID: {}", request.getExpenseCategoryId());
+            throw new RuntimeException("La categoría con ID " + request.getExpenseCategoryId() +
+                " no existe, no está activa o no es de tipo EXPENSE");
+        }
 
         Expense expense = Expense.builder()
                 .amount(request.getAmount())
@@ -113,6 +125,12 @@ public class ExpenseUseCase implements ExpenseServicePort {
             expense.setAmount(request.getAmount());
         }
         if (request.getExpenseCategoryId() != null) {
+            // Validar que la nueva categoría existe y es de tipo EXPENSE
+            if (!categoryClient.validateExpenseCategoryExists(request.getExpenseCategoryId())) {
+                logger.error("Categoría inválida con ID: {}", request.getExpenseCategoryId());
+                throw new RuntimeException("La categoría con ID " + request.getExpenseCategoryId() +
+                    " no existe, no está activa o no es de tipo EXPENSE");
+            }
             logger.info("Actualizando categoría de {} a {}", expense.getExpenseCategoryId(), request.getExpenseCategoryId());
             expense.setExpenseCategoryId(request.getExpenseCategoryId());
         }
@@ -151,10 +169,31 @@ public class ExpenseUseCase implements ExpenseServicePort {
 
 
     private ExpenseResponse mapToResponse(Expense expense) {
+        // Obtener información de la categoría
+        CategoryInfo categoryInfo = null;
+        try {
+            CategoryResponse categoryResponse = categoryClient.getCategoryById(expense.getExpenseCategoryId());
+            if (categoryResponse != null) {
+                categoryInfo = CategoryInfo.builder()
+                        .name(categoryResponse.getName())
+                        .description(categoryResponse.getDescription())
+                        .type(categoryResponse.getType() != null ? categoryResponse.getType().toString() : null)
+                        .build();
+                logger.debug("Información de categoría obtenida para el gasto ID: {}", expense.getExpenseId());
+            } else {
+                logger.warn("No se pudo obtener información de la categoría ID: {} para el gasto ID: {}",
+                        expense.getExpenseCategoryId(), expense.getExpenseId());
+            }
+        } catch (Exception e) {
+            logger.error("Error al obtener información de la categoría ID: {} para el gasto ID: {}",
+                    expense.getExpenseCategoryId(), expense.getExpenseId(), e);
+        }
+
         return ExpenseResponse.builder()
                 .expenseId(expense.getExpenseId())
                 .amount(expense.getAmount())
                 .expenseCategoryId(expense.getExpenseCategoryId())
+                .category(categoryInfo)
                 .expenseDate(expense.getExpenseDate())
                 .description(expense.getDescription())
                 .userId(expense.getUserId())

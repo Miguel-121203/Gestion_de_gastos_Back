@@ -16,6 +16,7 @@ public class ExpenseResponse {
     private Long expenseId;
     private BigDecimal amount;
     private Long expenseCategoryId;
+    private CategoryInfo category;
     private LocalDateTime expenseDate;
     private String description;
     private Long userId;

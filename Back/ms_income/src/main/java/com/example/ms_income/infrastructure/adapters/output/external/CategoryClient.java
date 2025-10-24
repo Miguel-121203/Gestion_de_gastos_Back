@@ -39,7 +39,7 @@ public class CategoryClient {
         }
     }
 
-    public boolean validateIncomeCategoryExists(Long categoryId) {
+    public boolean validateExpenseCategoryExists(Long categoryId) {
         CategoryResponse category = getCategoryById(categoryId);
 
         if (category == null) {
