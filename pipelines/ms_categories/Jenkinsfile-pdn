@@ -38,8 +38,8 @@ pipeline {
 
         stage('Build and Push Docker Image') {
             steps {
-                echo 'Building and pushing Docker image for Expense Service...'
-                dir('Back/ms_expense') {
+                echo 'Building and pushing Docker image for Categories Service...'
+                dir('Back/ms_categories') {
                     script {
                         sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
 
