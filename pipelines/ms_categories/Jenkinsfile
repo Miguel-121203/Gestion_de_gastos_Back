@@ -31,7 +31,7 @@ pipeline {
                 echo 'Copying JAR to Dockerfile location...'
                 sh '''
                     mkdir -p ./Back/ms_categories/target
-                    cp ./Back/ms_expense/ms_categories/target/*.jar ./Back/ms_categories/target/ || echo "JAR already in correct location"
+                    cp ./Back/ms_categories/target/*.jar ./Back/ms_categories/target/ || echo "JAR already in correct location"
                 '''
             }
         }
