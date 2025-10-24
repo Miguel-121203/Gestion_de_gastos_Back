@@ -33,8 +33,6 @@ public class Income {
     @Column(name = "description", length = 500)
     private String description;
 
-    @Column(name = "additional_notes", length = 1000)
-    private String additionalNotes;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
