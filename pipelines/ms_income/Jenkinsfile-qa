@@ -66,39 +66,12 @@ pipeline {
                       -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-qa:5432/gestion_gastos_qa" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
                       -e SPRING_DATASOURCE_PASSWORD=qa123456 \
-                      -e SERVER_PORT=8100 \
+                      -e CATEGORIES_SERVICE_URL=http://localhost:8111 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
                 '''
             }
         }
 
 
-    }
-
-    post {
-        success {
-            echo '''
-            ========================================
-            ✅ INCOME SERVICE QA DEPLOYMENT SUCCESSFUL!
-            ========================================
-            🌐 Application: http://localhost:8101
-            🔍 Health Check: http://localhost:8101/actuator/health
-            📊 Metrics: http://localhost:8101/actuator/metrics
-            🗄️ Database: localhost:5432 (gestion_gastos_qa)
-            ========================================
-            '''
-        }
-        failure {
-            echo 'Income Service QA deployment failed! Checking logs...'
-            sh '''
-                echo "Application logs:"
-                docker logs ms_income-qa || echo "No application logs available"
-                echo "Database logs:"
-                docker logs DataBase-qa || echo "No database logs available"
-            '''
-        }
-        always {
-            echo 'Pipeline execution completed.'
-        }
     }
 }

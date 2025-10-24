@@ -61,44 +61,17 @@ pipeline {
                     docker run -d \
                       --name ms_income-pdn \
                       --network gestion-gastos-pdn_default \
-                      -p 8102:8100 \
+                      -p 8100:8100 \
                       -e SPRING_PROFILES_ACTIVE=pdn \
                       -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-pdn:5432/gestion_gastos_pdn" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
                       -e SPRING_DATASOURCE_PASSWORD=${POSTGRES_PDN_PASSWORD:-pdn123456} \
-                      -e SERVER_PORT=8100 \
+                      -e CATEGORIES_SERVICE_URL=http://localhost:8110 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
                 '''
             }
         }
 
 
-    }
-
-    post {
-        success {
-            echo '''
-            ========================================
-            ✅ INCOME SERVICE PRODUCTION DEPLOYMENT SUCCESSFUL!
-            ========================================
-            🌐 Application: http://localhost:8102
-            🔍 Health Check: http://localhost:8102/actuator/health
-            📊 Metrics: http://localhost:8102/actuator/metrics
-            🗄️ Database: localhost:5434 (gestion_gastos_pdn)
-            ========================================
-            '''
-        }
-        failure {
-            echo 'Income Service PRODUCTION deployment failed! Checking logs...'
-            sh '''
-                echo "Application logs:"
-                docker logs ms_income-pdn || echo "No application logs available"
-                echo "Database logs:"
-                docker logs DataBase-pdn || echo "No database logs available"
-            '''
-        }
-        always {
-            echo 'Pipeline execution completed.'
-        }
     }
 }

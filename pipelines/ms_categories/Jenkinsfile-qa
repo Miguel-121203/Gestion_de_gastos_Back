@@ -1,9 +1,9 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_HUB_REPO = 'miguel1203/gestion-expense'
-        IMAGE_TAG = 'dev'
+     environment {
+        DOCKER_HUB_REPO = 'miguel1203/gestion-categories'
+        IMAGE_TAG = 'qa'
         DOCKER_USER = 'miguel1203'
         DOCKER_PASS = 'dckr_pat_5CQzKCl99YfG_0nuHQMiuxUw6AY'
     }
@@ -16,23 +16,10 @@ pipeline {
             }
         }
 
-        stage('Deploy Database') {
-            steps {
-                echo 'Deploying PostgreSQL DEV...'
-                dir('DB') {
-                    sh '''
-                        echo "🚀 Desplegando PostgreSQL DEV..."
-                        docker compose -f docker-compose-dev.yml -p gestion-gastos-dev up -d
-                        sleep 30
-                    '''
-                }
-            }
-        }
-
         stage('Build Application') {
             steps {
                 echo 'Building Spring Boot Expense Service...'
-                dir('Back/ms_expense/ms_expense') {
+                dir('Back/ms_categories') {
                     sh 'chmod +x ./mvnw'
                     sh './mvnw clean package -DskipTests'
                 }
@@ -43,8 +30,8 @@ pipeline {
             steps {
                 echo 'Copying JAR to Dockerfile location...'
                 sh '''
-                    mkdir -p ./Back/ms_expense/target
-                    cp ./Back/ms_expense/ms_expense/target/*.jar ./Back/ms_expense/target/
+                    mkdir -p ./Back/ms_categories/target
+                    cp ./Back/ms_expense/ms_categories/target/*.jar ./Back/ms_categories/target/ || echo "JAR already in correct location"
                 '''
             }
         }
@@ -65,21 +52,20 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                echo 'Deploying Expense Service DEV...'
+                echo 'Deploying Expense Service QA...'
                 sh '''
-                    echo "🚀 Desplegando Expense Service DEV..."
-                    docker stop ms_expense-dev || true
-                    docker rm ms_expense-dev || true
+                    echo "🚀 Desplegando Expense Service QA..."
+                    docker stop ms_expense-qa || true
+                    docker rm ms_expense-qa || true
 
                     docker run -d \
-                      --name ms_expense-dev \
-                      --network gestion-gastos-dev_default \
-                      -p 8082:8080 \
-                      -e SPRING_PROFILES_ACTIVE=dev \
-                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-dev:5432/gestion_gastos_dev" \
+                      --name ms_expense-qa \
+                      --network gestion-gastos-qa_default \
+                      -p 8111:8110 \
+                      -e SPRING_PROFILES_ACTIVE=qa \
+                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-qa:5432/gestion_gastos_qa" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
-                      -e SPRING_DATASOURCE_PASSWORD=dev123456 \
-                      -e CATEGORIES_SERVICE_URL=http://localhost:8112 \
+                      -e SPRING_DATASOURCE_PASSWORD=qa123456 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
                 '''
             }
