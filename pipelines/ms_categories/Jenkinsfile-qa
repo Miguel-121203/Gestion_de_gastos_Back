@@ -18,7 +18,7 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                echo 'Building Spring Boot Expense Service...'
+                echo 'Building Spring Boot Categories Service...'
                 dir('Back/ms_categories') {
                     sh 'chmod +x ./mvnw'
                     sh './mvnw clean package -DskipTests'
@@ -52,16 +52,16 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                echo 'Deploying Expense Service QA...'
+                echo 'Deploying Categories Service QA...'
                 sh '''
-                    echo "🚀 Desplegando Expense Service QA..."
-                    docker stop ms_expense-qa || true
-                    docker rm ms_expense-qa || true
+                    echo "🚀 Desplegando Categories Service QA..."
+                    docker stop ms_categories-qa || true
+                    docker rm ms_categories-qa || true
 
                     docker run -d \
-                      --name ms_expense-qa \
+                      --name ms_categories-qa \
                       --network gestion-gastos-qa_default \
-                      -p 8111:8110 \
+                      -p 8111:8090 \
                       -e SPRING_PROFILES_ACTIVE=qa \
                       -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-qa:5432/gestion_gastos_qa" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \

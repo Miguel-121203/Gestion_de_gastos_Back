@@ -18,7 +18,7 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                echo 'Building Spring Boot Expense Service...'
+                echo 'Building Spring Boot Categories Service...'
                 dir('Back/ms_categories') {
                     sh 'chmod +x ./mvnw'
                     sh './mvnw clean package -DskipTests'
@@ -52,16 +52,16 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                echo 'Deploying Expense Service PRODUCTION...'
+                echo 'Deploying Categories Service PRODUCTION...'
                 sh '''
-                    echo "🚀 Desplegando Expense Service PRODUCTION..."
-                    docker stop ms_expense-pdn || true
-                    docker rm ms_expense-pdn || true
+                    echo "🚀 Desplegando Categories Service PRODUCTION..."
+                    docker stop ms_categories-pdn || true
+                    docker rm ms_categories-pdn || true
 
                     docker run -d \
-                      --name ms_expense-pdn \
+                      --name ms_categories-pdn \
                       --network gestion-gastos-pdn_default \
-                      -p 8110:8110 \
+                      -p 8110:8090 \
                       -e SPRING_PROFILES_ACTIVE=pdn \
                       -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-pdn:5432/gestion_gastos_pdn" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
