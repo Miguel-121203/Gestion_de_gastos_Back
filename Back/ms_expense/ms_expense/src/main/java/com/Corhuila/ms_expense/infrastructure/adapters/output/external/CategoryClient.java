@@ -16,7 +16,7 @@ public class CategoryClient {
 
     public CategoryClient(
             RestTemplate restTemplate,
-            @Value("${categories.service.url}") String categoriesServiceUrl) {
+            @Value("${categories.service.url:http://localhost:8112}") String categoriesServiceUrl) {
         this.restTemplate = restTemplate;
         this.categoriesServiceUrl = categoriesServiceUrl;
     }
