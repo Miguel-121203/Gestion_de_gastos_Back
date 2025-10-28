@@ -58,8 +58,6 @@ pipeline {
 
                         def image = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
                         image.push()
-                        
-                        sh 'docker logout'
                     }
                 }
             }
@@ -70,8 +68,6 @@ pipeline {
                 echo 'Deploying Expense Service DEV...'
                 sh '''
                     echo "🚀 Desplegando Expense Service DEV..."
-                    
-                    # Crear red si no existe
                     docker network create gestios-gastos-back-dev || true
                     
                     docker stop ms_expense-dev || true
@@ -87,9 +83,6 @@ pipeline {
                       -e SPRING_DATASOURCE_PASSWORD=dev123456 \
                       -e CATEGORIES_SERVICE_URL=http://ms_categories-dev:8090 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
-                    
-                    sleep 5
-                    echo "✅ Expense Service deployed successfully"
                 '''
             }
         }

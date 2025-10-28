@@ -45,8 +45,6 @@ pipeline {
 
                         def image = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
                         image.push()
-                        
-                        sh 'docker logout'
                     }
                 }
             }
@@ -57,8 +55,6 @@ pipeline {
                 echo 'Deploying Categories Service DEV...'
                 sh '''
                     echo "🚀 Desplegando Categories Service DEV..."
-                    
-                    # Crear red si no existe
                     docker network create gestios-gastos-back-dev || true
                     
                     docker stop ms_categories-dev || true
@@ -76,6 +72,7 @@ pipeline {
                 '''
             }
         }
+
 
     }
 

@@ -16,6 +16,19 @@ pipeline {
             }
         }
 
+        stage('Deploy Database') {
+            steps {
+                echo 'Deploying PostgreSQL DEV...'
+                dir('DB') {
+                    sh '''
+                        echo "🚀 Desplegando PostgreSQL DEV..."
+                        docker compose -f docker-compose-dev.yml -p gestion-gastos-dev up -d
+                        sleep 30
+                    '''
+                }
+            }
+        }
+
         stage('Build Application') {
             steps {
                 echo 'Building Spring Boot Income Service...'
@@ -45,8 +58,6 @@ pipeline {
 
                         def image = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
                         image.push()
-                        
-                        sh 'docker logout'
                     }
                 }
             }
@@ -57,8 +68,6 @@ pipeline {
                 echo 'Deploying Income Service DEV...'
                 sh '''
                     echo "🚀 Desplegando Income Service DEV..."
-                    
-                    # Crear red si no existe
                     docker network create gestios-gastos-back-dev || true
                     
                     docker stop ms_income-dev || true
@@ -74,12 +83,10 @@ pipeline {
                       -e SPRING_DATASOURCE_PASSWORD=dev123456 \
                       -e CATEGORIES_SERVICE_URL=http://ms_categories-dev:8090 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
-                    
-                    sleep 5
-                    echo "✅ Income Service deployed successfully"
                 '''
             }
         }
+
 
     }
 
