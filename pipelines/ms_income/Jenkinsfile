@@ -57,6 +57,7 @@ pipeline {
                 sh '''
                     echo "🚀 Desplegando Income Service DEV..."
                     docker network create gestios-gastos-back-dev || true
+                    docker network connect gestios-gastos-back-dev DataBase-dev || true
                     
                     docker stop ms_income-dev || true
                     docker rm ms_income-dev || true
