@@ -16,6 +16,18 @@ pipeline {
             }
         }
 
+        stage('Deploy Database') {
+            steps {
+                echo 'Deploying PostgreSQL DEV...'
+                dir('DB') {
+                    sh '''
+                        echo "🚀 Desplegando PostgreSQL DEV..."
+                        docker compose -f docker-compose-dev.yml -p gestion-gastos-dev up -d
+                        sleep 30
+                    '''
+                }
+            }
+        }
 
         stage('Build Application') {
             steps {
@@ -57,6 +69,7 @@ pipeline {
                 sh '''
                     echo "🚀 Desplegando Income Service DEV..."
                     docker network create gestios-gastos-back-dev || true
+                    docker network connect gestios-gastos-back-dev DataBase-dev || true
                     
                     docker stop ms_income-dev || true
                     docker rm ms_income-dev || true

@@ -56,6 +56,7 @@ pipeline {
                 sh '''
                     echo "🚀 Desplegando Categories Service DEV..."
                     docker network create gestios-gastos-back-dev || true
+                    docker network connect gestios-gastos-back-dev DataBase-dev || true
                     
                     docker stop ms_categories-dev || true
                     docker rm ms_categories-dev || true
