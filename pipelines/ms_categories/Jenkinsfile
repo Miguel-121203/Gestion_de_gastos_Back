@@ -45,6 +45,8 @@ pipeline {
 
                         def image = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
                         image.push()
+                        
+                        sh 'docker logout'
                     }
                 }
             }
@@ -55,22 +57,25 @@ pipeline {
                 echo 'Deploying Categories Service DEV...'
                 sh '''
                     echo "🚀 Desplegando Categories Service DEV..."
+                    
+                    # Crear red si no existe
+                    docker network create gestios-gastos-back-dev || true
+                    
                     docker stop ms_categories-dev || true
                     docker rm ms_categories-dev || true
 
                     docker run -d \
                       --name ms_categories-dev \
-                      --network gestion-gastos-dev_default \
+                      --network gestios-gastos-back-dev \
                       -p 8112:8090 \
                       -e SPRING_PROFILES_ACTIVE=dev \
-                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-dev:5432/gestion_gastos_dev" \
+                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://database-dev:5432/gestion_gastos_dev" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
                       -e SPRING_DATASOURCE_PASSWORD=dev123456 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
                 '''
             }
         }
-
 
     }
 
