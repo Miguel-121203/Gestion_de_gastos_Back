@@ -69,7 +69,7 @@ pipeline {
                       --network gestios-gastos-back-dev \
                       -p 8112:8090 \
                       -e SPRING_PROFILES_ACTIVE=dev \
-                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://database-dev:5432/gestion_gastos_dev" \
+                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-dev:5432/gestion_gastos_dev" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
                       -e SPRING_DATASOURCE_PASSWORD=dev123456 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
