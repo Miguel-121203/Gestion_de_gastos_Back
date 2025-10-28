@@ -58,11 +58,11 @@ pipeline {
                     docker network create gestios-gastos-back-dev || true
                     docker network connect gestios-gastos-back-dev DataBase-dev || true
                     
-                    docker stop ms_categories-dev || true
-                    docker rm ms_categories-dev || true
+                    docker stop mscategories-dev || true
+                    docker rm mscategories-dev || true
 
                     docker run -d \
-                      --name ms_categories-dev \
+                      --name mscategories-dev \
                       --network gestios-gastos-back-dev \
                       -p 8112:8090 \
                       -e SPRING_PROFILES_ACTIVE=dev \
