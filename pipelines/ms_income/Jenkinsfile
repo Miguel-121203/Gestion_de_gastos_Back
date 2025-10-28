@@ -16,18 +16,6 @@ pipeline {
             }
         }
 
-        stage('Deploy Database') {
-            steps {
-                echo 'Deploying PostgreSQL DEV...'
-                dir('DB') {
-                    sh '''
-                        echo "🚀 Desplegando PostgreSQL DEV..."
-                        docker compose -f docker-compose-dev.yml -p gestion-gastos-dev up -d
-                        sleep 30
-                    '''
-                }
-            }
-        }
 
         stage('Build Application') {
             steps {
