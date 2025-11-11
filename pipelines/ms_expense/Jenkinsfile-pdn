@@ -68,17 +68,21 @@ pipeline {
                 echo 'Deploying Expense Service PRODUCTION...'
                 sh '''
                     echo "🚀 Desplegando Expense Service PRODUCTION..."
-                    docker stop ms_expense-pdn || true
-                    docker rm ms_expense-pdn || true
+
+                    docker network create gestios-gastos-back-pdn || true
+                    docker network connect gestios-gastos-back-pdn DataBase-pdn || true
+                    docker stop msexpense-pdn || true
+                    docker rm msexpense-pdn || true
 
                     docker run -d \
-                      --name ms_expense-pdn \
+                      --name msexpense-pdn \
                       --network gestion-gastos-pdn_default \
-                      -p 8082:8080 \
+                      -p 8080:8080 \
                       -e SPRING_PROFILES_ACTIVE=pdn \
                       -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-pdn:5432/gestion_gastos_pdn" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
                       -e SPRING_DATASOURCE_PASSWORD=${POSTGRES_PDN_PASSWORD:-pdn123456} \
+                      -e CATEGORIES_SERVICE_URL=http://mscategories-pdn:8090 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
                 '''
             }
@@ -87,30 +91,4 @@ pipeline {
 
     }
 
-    post {
-        success {
-            echo '''
-            ========================================
-            ✅ EXPENSE SERVICE PRODUCTION DEPLOYMENT SUCCESSFUL!
-            ========================================
-            🌐 Application: http://localhost:8082
-            🔍 Health Check: http://localhost:8082/actuator/health
-            📊 Metrics: http://localhost:8082/actuator/metrics
-            🗄️ Database: localhost:5434 (gestion_gastos_pdn)
-            ========================================
-            '''
-        }
-        failure {
-            echo 'Expense Service PRODUCTION deployment failed! Checking logs...'
-            sh '''
-                echo "Application logs:"
-                docker logs ms_expense-pdn || echo "No application logs available"
-                echo "Database logs:"
-                docker logs DataBase-pdn || echo "No database logs available"
-            '''
-        }
-        always {
-            echo 'Pipeline execution completed.'
-        }
-    }
 }

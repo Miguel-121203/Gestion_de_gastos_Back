@@ -16,9 +16,8 @@ public class IncomeResponse {
     private Long incomeId;
     private LocalDateTime incomeDate;
     private BigDecimal amount;
-    private Long incomeCategoryId;
+    private CategoryInfo category;
     private String description;
-    private String additionalNotes;
     private Long userId;
     private Boolean active;
     private LocalDateTime createdAt;

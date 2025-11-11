@@ -1,0 +1,121 @@
+{
+  "id": "gestion-gastos-local",
+  "name": "Gestion Gastos Local",
+  "values": [
+    {
+      "key": "ms_user_url",
+      "value": "http://localhost:8110",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "ms_categories_url",
+      "value": "http://localhost:8090",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "ms_expense_url",
+      "value": "http://localhost:8080",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "ms_income_url",
+      "value": "http://localhost:8100",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "token2",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "userId2",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "expenseCategoryId1",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "expenseCategoryId2",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "expenseCategoryId3",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "incomeCategoryId1",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "incomeCategoryId2",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "expenseId1",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "expenseId2",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "expenseId3",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "incomeId1",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "incomeId2",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "incomeId3",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}

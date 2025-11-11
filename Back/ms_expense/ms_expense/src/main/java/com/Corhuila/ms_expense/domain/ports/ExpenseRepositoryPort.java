@@ -11,6 +11,7 @@ public interface ExpenseRepositoryPort {
     Expense save(Expense expense);
     Optional<Expense> findByIdAndActiveTrue(Long id);
     List<Expense> findAllActive();
+    List<Expense> findByUserIdAndActiveTrue(Long userId);
     List<Expense> findByUserIdAndExpenseCategoryIdAndActiveTrue(Long userId, Long categoryId);
     List<Expense> findByUserIdAndExpenseDateBetweenAndActiveTrue(Long userId, LocalDateTime startDate, LocalDateTime endDate);
     List<Expense> findByUserIdAndAmountBetweenAndActiveTrue(Long userId, BigDecimal minAmount, BigDecimal maxAmount);

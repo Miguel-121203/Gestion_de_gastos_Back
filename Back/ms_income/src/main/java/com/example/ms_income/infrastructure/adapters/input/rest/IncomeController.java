@@ -4,6 +4,7 @@ import com.example.ms_income.domain.model.dto.IncomeRequest;
 import com.example.ms_income.domain.model.dto.IncomeResponse;
 import com.example.ms_income.domain.model.dto.IncomeUpdateRequest;
 import com.example.ms_income.domain.ports.IncomeServicePort;
+import com.example.ms_income.infrastructure.security.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +26,46 @@ public class IncomeController {
 
     private static final Logger logger = LoggerFactory.getLogger(IncomeController.class);
     private final IncomeServicePort incomeServicePort;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public IncomeController(IncomeServicePort incomeServicePort) {
+    public IncomeController(IncomeServicePort incomeServicePort, JwtUtil jwtUtil) {
         this.incomeServicePort = incomeServicePort;
+        this.jwtUtil = jwtUtil;
+    }
+
+    /**
+     * Extract JWT token from Authorization header
+     */
+    private String extractToken(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
+    }
+
+    /**
+     * Extract userId from JWT token
+     */
+    private Long extractUserId(String authHeader) {
+        String token = extractToken(authHeader);
+        if (token != null) {
+            return jwtUtil.extractUserId(token);
+        }
+        throw new IllegalArgumentException("Invalid or missing Authorization header");
     }
 
     @PostMapping
-    public ResponseEntity<IncomeResponse> createIncome(@Valid @RequestBody IncomeRequest request) {
+    public ResponseEntity<IncomeResponse> createIncome(
+            @RequestHeader("Authorization") String authHeader,
+            @Valid @RequestBody IncomeRequest request) {
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
+        request.setUserId(userId);
+
         logger.info("Solicitud recibida para crear ingreso - Usuario: {}, Monto: {}, Categoría: {}",
-                request.getUserId(), request.getAmount(), request.getIncomeCategoryId());
+                userId, request.getAmount(), request.getIncomeCategoryId());
 
         IncomeResponse response = incomeServicePort.createIncome(request);
 
@@ -44,9 +75,21 @@ public class IncomeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<IncomeResponse> updateIncome(
+            @RequestHeader("Authorization") String authHeader,
             @PathVariable Long id,
             @Valid @RequestBody IncomeUpdateRequest request) {
-        logger.info("Solicitud recibida para actualizar ingreso con ID: {}", id);
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
+
+        logger.info("Solicitud recibida para actualizar ingreso con ID: {} del usuario: {}", id, userId);
+
+        // Validate that the income belongs to the authenticated user
+        IncomeResponse existingIncome = incomeServicePort.getIncomeById(id);
+        if (!existingIncome.getUserId().equals(userId)) {
+            logger.warn("Usuario {} intentó actualizar ingreso {} que no le pertenece", userId, id);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         IncomeResponse response = incomeServicePort.updateIncome(id, request);
 
@@ -55,8 +98,21 @@ public class IncomeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteIncome(@PathVariable Long id) {
-        logger.info("Solicitud recibida para eliminar ingreso con ID: {}", id);
+    public ResponseEntity<Void> deleteIncome(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Long id) {
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
+
+        logger.info("Solicitud recibida para eliminar ingreso con ID: {} del usuario: {}", id, userId);
+
+        // Validate that the income belongs to the authenticated user
+        IncomeResponse existingIncome = incomeServicePort.getIncomeById(id);
+        if (!existingIncome.getUserId().equals(userId)) {
+            logger.warn("Usuario {} intentó eliminar ingreso {} que no le pertenece", userId, id);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         incomeServicePort.deleteIncome(id);
 
@@ -65,20 +121,28 @@ public class IncomeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<IncomeResponse>> getAllIncomes() {
-        logger.info("Solicitud recibida para obtener todos los ingresos");
+    public ResponseEntity<List<IncomeResponse>> getAllIncomes(
+            @RequestHeader("Authorization") String authHeader) {
 
-        List<IncomeResponse> responses = incomeServicePort.getAllIncomes();
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
 
-        logger.info("Respuesta enviada con {} ingresos", responses.size());
+        logger.info("Solicitud recibida para obtener todos los ingresos del usuario: {}", userId);
+
+        List<IncomeResponse> responses = incomeServicePort.getIncomesByUserId(userId);
+
+        logger.info("Respuesta enviada con {} ingresos para usuario: {}", responses.size(), userId);
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/user/{userId}/date-range")
-    public ResponseEntity<List<IncomeResponse>> getIncomesByUserIdAndDateRange(
-            @PathVariable Long userId,
+    @GetMapping("/date-range")
+    public ResponseEntity<List<IncomeResponse>> getIncomesByDateRange(
+            @RequestHeader("Authorization") String authHeader,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
 
         logger.info("Solicitud recibida para filtrar ingresos por fecha - Usuario: {}, Rango: {} a {}",
                 userId, startDate, endDate);
@@ -92,10 +156,14 @@ public class IncomeController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/user/{userId}/category/{categoryId}")
-    public ResponseEntity<List<IncomeResponse>> getIncomesByUserIdAndCategory(
-            @PathVariable Long userId,
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<List<IncomeResponse>> getIncomesByCategory(
+            @RequestHeader("Authorization") String authHeader,
             @PathVariable Long categoryId) {
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
+
         logger.info("Solicitud recibida para filtrar ingresos por categoría - Usuario: {}, Categoría: {}",
                 userId, categoryId);
 
@@ -105,11 +173,15 @@ public class IncomeController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/user/{userId}/amount-range")
-    public ResponseEntity<List<IncomeResponse>> getIncomesByUserIdAndAmountRange(
-            @PathVariable Long userId,
+    @GetMapping("/amount-range")
+    public ResponseEntity<List<IncomeResponse>> getIncomesByAmountRange(
+            @RequestHeader("Authorization") String authHeader,
             @RequestParam BigDecimal minAmount,
             @RequestParam BigDecimal maxAmount) {
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
+
         logger.info("Solicitud recibida para filtrar ingresos por monto - Usuario: {}, Rango: {} a {}",
                 userId, minAmount, maxAmount);
 

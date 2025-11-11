@@ -4,6 +4,7 @@ import com.Corhuila.ms_expense.domain.model.dto.ExpenseRequest;
 import com.Corhuila.ms_expense.domain.model.dto.ExpenseResponse;
 import com.Corhuila.ms_expense.domain.model.dto.ExpenseUpdateRequest;
 import com.Corhuila.ms_expense.domain.ports.ExpenseServicePort;
+import com.Corhuila.ms_expense.infrastructure.security.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +26,46 @@ public class ExpenseController {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpenseController.class);
     private final ExpenseServicePort expenseServicePort;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public ExpenseController(ExpenseServicePort expenseServicePort) {
+    public ExpenseController(ExpenseServicePort expenseServicePort, JwtUtil jwtUtil) {
         this.expenseServicePort = expenseServicePort;
+        this.jwtUtil = jwtUtil;
+    }
+
+    /**
+     * Extract JWT token from Authorization header
+     */
+    private String extractToken(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
+    }
+
+    /**
+     * Extract userId from JWT token
+     */
+    private Long extractUserId(String authHeader) {
+        String token = extractToken(authHeader);
+        if (token != null) {
+            return jwtUtil.extractUserId(token);
+        }
+        throw new IllegalArgumentException("Invalid or missing Authorization header");
     }
 
     @PostMapping
-    public ResponseEntity<ExpenseResponse> createExpense(@Valid @RequestBody ExpenseRequest request) {
+    public ResponseEntity<ExpenseResponse> createExpense(
+            @RequestHeader("Authorization") String authHeader,
+            @Valid @RequestBody ExpenseRequest request) {
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
+        request.setUserId(userId);
+
         logger.info("Solicitud recibida para crear gasto - Usuario: {}, Monto: {}, Categoría: {}",
-                request.getUserId(), request.getAmount(), request.getExpenseCategoryId());
+                userId, request.getAmount(), request.getExpenseCategoryId());
 
         ExpenseResponse response = expenseServicePort.createExpense(request);
 
@@ -44,9 +75,21 @@ public class ExpenseController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ExpenseResponse> updateExpense(
+            @RequestHeader("Authorization") String authHeader,
             @PathVariable Long id,
             @Valid @RequestBody ExpenseUpdateRequest request) {
-        logger.info("Solicitud recibida para actualizar gasto con ID: {}", id);
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
+
+        logger.info("Solicitud recibida para actualizar gasto con ID: {} del usuario: {}", id, userId);
+
+        // Validate that the expense belongs to the authenticated user
+        ExpenseResponse existingExpense = expenseServicePort.getExpenseById(id);
+        if (!existingExpense.getUserId().equals(userId)) {
+            logger.warn("Usuario {} intentó actualizar gasto {} que no le pertenece", userId, id);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         ExpenseResponse response = expenseServicePort.updateExpense(id, request);
 
@@ -55,8 +98,21 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
-        logger.info("Solicitud recibida para eliminar gasto con ID: {}", id);
+    public ResponseEntity<Void> deleteExpense(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Long id) {
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
+
+        logger.info("Solicitud recibida para eliminar gasto con ID: {} del usuario: {}", id, userId);
+
+        // Validate that the expense belongs to the authenticated user
+        ExpenseResponse existingExpense = expenseServicePort.getExpenseById(id);
+        if (!existingExpense.getUserId().equals(userId)) {
+            logger.warn("Usuario {} intentó eliminar gasto {} que no le pertenece", userId, id);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         expenseServicePort.deleteExpense(id);
 
@@ -65,20 +121,28 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpenseResponse>> getAllExpenses() {
-        logger.info("Solicitud recibida para obtener todos los gastos");
+    public ResponseEntity<List<ExpenseResponse>> getAllExpenses(
+            @RequestHeader("Authorization") String authHeader) {
 
-        List<ExpenseResponse> responses = expenseServicePort.getAllExpenses();
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
 
-        logger.info("Respuesta enviada con {} gastos", responses.size());
+        logger.info("Solicitud recibida para obtener todos los gastos del usuario: {}", userId);
+
+        List<ExpenseResponse> responses = expenseServicePort.getExpensesByUserId(userId);
+
+        logger.info("Respuesta enviada con {} gastos para usuario: {}", responses.size(), userId);
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/user/{userId}/date-range")
-    public ResponseEntity<List<ExpenseResponse>> getExpensesByUserIdAndDateRange(
-            @PathVariable Long userId,
+    @GetMapping("/date-range")
+    public ResponseEntity<List<ExpenseResponse>> getExpensesByDateRange(
+            @RequestHeader("Authorization") String authHeader,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
 
         logger.info("Solicitud recibida para filtrar gastos por fecha - Usuario: {}, Rango: {} a {}",
                 userId, startDate, endDate);
@@ -92,10 +156,14 @@ public class ExpenseController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/user/{userId}/category/{categoryId}")
-    public ResponseEntity<List<ExpenseResponse>> getExpensesByUserIdAndCategory(
-            @PathVariable Long userId,
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<List<ExpenseResponse>> getExpensesByCategory(
+            @RequestHeader("Authorization") String authHeader,
             @PathVariable Long categoryId) {
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
+
         logger.info("Solicitud recibida para filtrar gastos por categoría - Usuario: {}, Categoría: {}",
                 userId, categoryId);
 
@@ -105,11 +173,15 @@ public class ExpenseController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/user/{userId}/amount-range")
-    public ResponseEntity<List<ExpenseResponse>> getExpensesByUserIdAndAmountRange(
-            @PathVariable Long userId,
+    @GetMapping("/amount-range")
+    public ResponseEntity<List<ExpenseResponse>> getExpensesByAmountRange(
+            @RequestHeader("Authorization") String authHeader,
             @RequestParam BigDecimal minAmount,
             @RequestParam BigDecimal maxAmount) {
+
+        // Extract userId from JWT token
+        Long userId = extractUserId(authHeader);
+
         logger.info("Solicitud recibida para filtrar gastos por monto - Usuario: {}, Rango: {} a {}",
                 userId, minAmount, maxAmount);
 

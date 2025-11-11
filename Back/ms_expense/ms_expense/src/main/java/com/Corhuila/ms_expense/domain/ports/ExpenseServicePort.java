@@ -10,7 +10,9 @@ import java.util.List;
 
 public interface ExpenseServicePort {
     ExpenseResponse createExpense(ExpenseRequest request);
+    ExpenseResponse getExpenseById(Long id);
     List<ExpenseResponse> getAllExpenses();
+    List<ExpenseResponse> getExpensesByUserId(Long userId);
     List<ExpenseResponse> getExpensesByUserIdAndCategory(Long userId, Long categoryId);
     List<ExpenseResponse> getExpensesByUserIdAndDateRange(Long userId, LocalDateTime startDate, LocalDateTime endDate);
     List<ExpenseResponse> getExpensesByUserIdAndAmountRange(Long userId, BigDecimal minAmount, BigDecimal maxAmount);
