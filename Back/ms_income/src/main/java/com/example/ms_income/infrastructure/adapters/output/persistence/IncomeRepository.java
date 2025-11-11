@@ -16,6 +16,9 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
 
     Optional<Income> findByIncomeIdAndActiveTrue(Long incomeId);
 
+    @Query("SELECT i FROM Income i WHERE i.userId = :userId AND i.active = true")
+    List<Income> findByUserIdAndActiveTrue(@Param("userId") Long userId);
+
     @Query("SELECT i FROM Income i WHERE i.userId = :userId AND i.incomeCategoryId = :categoryId AND i.active = true")
     List<Income> findByUserIdAndIncomeCategoryIdAndActiveTrue(@Param("userId") Long userId, @Param("categoryId") Long categoryId);
 

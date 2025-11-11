@@ -61,6 +61,20 @@ public class ExpenseUseCase implements ExpenseServicePort {
     }
 
     @Override
+    public ExpenseResponse getExpenseById(Long id) {
+        logger.info("Obteniendo gasto con ID: {}", id);
+
+        Expense expense = expenseRepositoryPort.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> {
+                    logger.error("No se encontró gasto activo con ID: {}", id);
+                    return new RuntimeException("Gasto no encontrado con ID: " + id);
+                });
+
+        logger.info("Gasto encontrado con ID: {} para usuario: {}", id, expense.getUserId());
+        return mapToResponse(expense);
+    }
+
+    @Override
     public List<ExpenseResponse> getAllExpenses() {
         logger.info("Obteniendo todos los gastos activos");
 
@@ -72,7 +86,17 @@ public class ExpenseUseCase implements ExpenseServicePort {
         return expenses;
     }
 
+    @Override
+    public List<ExpenseResponse> getExpensesByUserId(Long userId) {
+        logger.info("Obteniendo todos los gastos del usuario: {}", userId);
 
+        List<ExpenseResponse> expenses = expenseRepositoryPort.findByUserIdAndActiveTrue(userId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+
+        logger.info("Se encontraron {} gastos para el usuario: {}", expenses.size(), userId);
+        return expenses;
+    }
 
     @Override
     public List<ExpenseResponse> getExpensesByUserIdAndCategory(Long userId, Long categoryId) {

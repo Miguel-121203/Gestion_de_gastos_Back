@@ -38,6 +38,11 @@ public class ExpenseRepositoryAdapter implements ExpenseRepositoryPort {
     }
 
     @Override
+    public List<Expense> findByUserIdAndActiveTrue(Long userId) {
+        return expenseRepository.findByUserIdAndActiveTrue(userId);
+    }
+
+    @Override
     public List<Expense> findByUserIdAndExpenseCategoryIdAndActiveTrue(Long userId, Long categoryId) {
         return expenseRepository.findByUserIdAndExpenseCategoryIdAndActiveTrue(userId, categoryId);
     }

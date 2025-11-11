@@ -11,6 +11,7 @@ public interface IncomeRepositoryPort {
     Income save(Income income);
     Optional<Income> findByIdAndActiveTrue(Long id);
     List<Income> findAllActive();
+    List<Income> findByUserIdAndActiveTrue(Long userId);
     List<Income> findByUserIdAndIncomeCategoryIdAndActiveTrue(Long userId, Long categoryId);
     List<Income> findByUserIdAndIncomeDateBetweenAndActiveTrue(Long userId, LocalDateTime startDate, LocalDateTime endDate);
     List<Income> findByUserIdAndAmountBetweenAndActiveTrue(Long userId, BigDecimal minAmount, BigDecimal maxAmount);
