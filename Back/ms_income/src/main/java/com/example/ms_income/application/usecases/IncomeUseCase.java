@@ -62,6 +62,20 @@ public class IncomeUseCase implements IncomeServicePort {
     }
 
     @Override
+    public IncomeResponse getIncomeById(Long id) {
+        logger.info("Obteniendo ingreso con ID: {}", id);
+
+        Income income = incomeRepositoryPort.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> {
+                    logger.error("No se encontró ingreso activo con ID: {}", id);
+                    return new RuntimeException("Ingreso no encontrado con ID: " + id);
+                });
+
+        logger.info("Ingreso encontrado con ID: {} para usuario: {}", id, income.getUserId());
+        return mapToResponse(income);
+    }
+
+    @Override
     public List<IncomeResponse> getAllIncomes() {
         logger.info("Obteniendo todos los ingresos activos");
 
@@ -70,6 +84,18 @@ public class IncomeUseCase implements IncomeServicePort {
                 .collect(Collectors.toList());
 
         logger.info("Se encontraron {} ingresos activos", incomes.size());
+        return incomes;
+    }
+
+    @Override
+    public List<IncomeResponse> getIncomesByUserId(Long userId) {
+        logger.info("Obteniendo todos los ingresos del usuario: {}", userId);
+
+        List<IncomeResponse> incomes = incomeRepositoryPort.findByUserIdAndActiveTrue(userId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+
+        logger.info("Se encontraron {} ingresos para el usuario: {}", incomes.size(), userId);
         return incomes;
     }
 

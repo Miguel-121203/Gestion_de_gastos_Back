@@ -1,0 +1,302 @@
+{
+  "info": {
+    "name": "MS_CATEGORIES - Gestión de Categorías",
+    "description": "Colección de endpoints para el microservicio de categorías (ms_categories) - Port 8090",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Create Expense Category - Alimentación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"expenseCategoryId1\", jsonData.categoryId);",
+                  "    pm.test(\"Category created successfully\", function () {",
+                  "        pm.expect(jsonData.categoryId).to.not.be.undefined;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alimentación\",\n  \"description\": \"Gastos en comida, restaurantes y supermercado\",\n  \"type\": \"EXPENSE\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories"]
+            },
+            "description": "Crea una categoría de tipo EXPENSE para gastos de alimentación."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Expense Category - Transporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"expenseCategoryId2\", jsonData.categoryId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Transporte\",\n  \"description\": \"Gastos en transporte público, gasolina, Uber\",\n  \"type\": \"EXPENSE\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories"]
+            },
+            "description": "Crea una categoría de tipo EXPENSE para gastos de transporte."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Expense Category - Entretenimiento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"expenseCategoryId3\", jsonData.categoryId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Entretenimiento\",\n  \"description\": \"Cine, streaming, conciertos, eventos\",\n  \"type\": \"EXPENSE\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories"]
+            },
+            "description": "Crea una categoría de tipo EXPENSE para entretenimiento."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Income Category - Salario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"incomeCategoryId1\", jsonData.categoryId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Salario\",\n  \"description\": \"Ingreso mensual por trabajo\",\n  \"type\": \"INCOME\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories"]
+            },
+            "description": "Crea una categoría de tipo INCOME para salario."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Income Category - Freelance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"incomeCategoryId2\", jsonData.categoryId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Freelance\",\n  \"description\": \"Ingresos por trabajos independientes\",\n  \"type\": \"INCOME\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories"]
+            },
+            "description": "Crea una categoría de tipo INCOME para trabajos freelance."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories"]
+            },
+            "description": "Obtiene todas las categorías activas (EXPENSE e INCOME)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Categories by Type - EXPENSE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories/type/EXPENSE",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories", "type", "EXPENSE"]
+            },
+            "description": "Obtiene solo las categorías de tipo EXPENSE."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Categories by Type - INCOME",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories/type/INCOME",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories", "type", "INCOME"]
+            },
+            "description": "Obtiene solo las categorías de tipo INCOME."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories/{{expenseCategoryId1}}",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories", "{{expenseCategoryId1}}"]
+            },
+            "description": "Obtiene una categoría específica por su ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alimentación y Bebidas\",\n  \"description\": \"Gastos en comida, restaurantes, supermercado y bebidas\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories/{{expenseCategoryId1}}",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories", "{{expenseCategoryId1}}"]
+            },
+            "description": "Actualiza una categoría existente."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{ms_categories_url}}/api/v1/categories/{{expenseCategoryId3}}",
+              "host": ["{{ms_categories_url}}"],
+              "path": ["api", "v1", "categories", "{{expenseCategoryId3}}"]
+            },
+            "description": "Elimina lógicamente una categoría (soft delete)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "ms_categories_url",
+      "value": "http://localhost:8090",
+      "type": "string"
+    }
+  ]
+}

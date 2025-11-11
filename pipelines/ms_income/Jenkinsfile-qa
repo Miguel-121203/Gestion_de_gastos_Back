@@ -55,11 +55,14 @@ pipeline {
                 echo 'Deploying Income Service QA...'
                 sh '''
                     echo "🚀 Desplegando Income Service QA..."
-                    docker stop ms_income-qa || true
-                    docker rm ms_income-qa || true
+                    docker network create gestios-gastos-back-qa || true
+                    docker network connect gestios-gastos-back-qa DataBase-qa || true
+
+                    docker stop msincome-qa || true
+                    docker rm msincome-qa || true
 
                     docker run -d \
-                      --name ms_income-qa \
+                      --name msincome-qa \
                       --network gestion-gastos-qa_default \
                       -p 8101:8100 \
                       -e SPRING_PROFILES_ACTIVE=qa \

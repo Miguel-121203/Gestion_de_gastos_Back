@@ -1,0 +1,309 @@
+{
+  "info": {
+    "name": "MS_INCOME - Gestión de Ingresos",
+    "description": "Colección de endpoints para el microservicio de ingresos (ms_income) - Port 8100. REQUIERE TOKEN JWT.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Incomes",
+      "item": [
+        {
+          "name": "Create Income - Salario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"incomeId1\", jsonData.incomeId);",
+                  "    pm.test(\"Income created successfully\", function () {",
+                  "        pm.expect(jsonData.incomeId).to.not.be.undefined;",
+                  "        pm.expect(jsonData.userId).to.equal(parseInt(pm.environment.get(\"userId\")));",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 3000.00,\n  \"incomeCategoryId\": {{incomeCategoryId1}},\n  \"incomeDate\": \"2025-11-01\",\n  \"description\": \"Salario mensual noviembre 2025\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_income_url}}/api/v1/incomes",
+              "host": ["{{ms_income_url}}"],
+              "path": ["api", "v1", "incomes"]
+            },
+            "description": "Crea un ingreso asociado al usuario autenticado. El userId se extrae automáticamente del token JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Income - Freelance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"incomeId2\", jsonData.incomeId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500.00,\n  \"incomeCategoryId\": {{incomeCategoryId2}},\n  \"incomeDate\": \"2025-11-05\",\n  \"description\": \"Proyecto freelance - Desarrollo web\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_income_url}}/api/v1/incomes",
+              "host": ["{{ms_income_url}}"],
+              "path": ["api", "v1", "incomes"]
+            },
+            "description": "Crea un ingreso por trabajo freelance."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Income - Bono",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"incomeId3\", jsonData.incomeId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 800.00,\n  \"incomeCategoryId\": {{incomeCategoryId1}},\n  \"incomeDate\": \"2025-11-15\",\n  \"description\": \"Bono por desempeño\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_income_url}}/api/v1/incomes",
+              "host": ["{{ms_income_url}}"],
+              "path": ["api", "v1", "incomes"]
+            },
+            "description": "Crea un ingreso por bono."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All User Incomes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_income_url}}/api/v1/incomes",
+              "host": ["{{ms_income_url}}"],
+              "path": ["api", "v1", "incomes"]
+            },
+            "description": "Obtiene todos los ingresos del usuario autenticado. Solo devuelve los ingresos que pertenecen al usuario del token."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Income",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 3200.00,\n  \"description\": \"Salario mensual noviembre 2025 + ajuste\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_income_url}}/api/v1/incomes/{{incomeId1}}",
+              "host": ["{{ms_income_url}}"],
+              "path": ["api", "v1", "incomes", "{{incomeId1}}"]
+            },
+            "description": "Actualiza un ingreso existente. Solo puede actualizar ingresos que pertenecen al usuario autenticado (validación de ownership)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Incomes by Date Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_income_url}}/api/v1/incomes/date-range?startDate=2025-11-01&endDate=2025-11-30",
+              "host": ["{{ms_income_url}}"],
+              "path": ["api", "v1", "incomes", "date-range"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-11-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-11-30"
+                }
+              ]
+            },
+            "description": "Filtra los ingresos del usuario autenticado por rango de fechas. Formato: yyyy-MM-dd"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Incomes by Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_income_url}}/api/v1/incomes/category/{{incomeCategoryId1}}",
+              "host": ["{{ms_income_url}}"],
+              "path": ["api", "v1", "incomes", "category", "{{incomeCategoryId1}}"]
+            },
+            "description": "Filtra los ingresos del usuario autenticado por categoría específica."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Incomes by Amount Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_income_url}}/api/v1/incomes/amount-range?minAmount=1000&maxAmount=5000",
+              "host": ["{{ms_income_url}}"],
+              "path": ["api", "v1", "incomes", "amount-range"],
+              "query": [
+                {
+                  "key": "minAmount",
+                  "value": "1000"
+                },
+                {
+                  "key": "maxAmount",
+                  "value": "5000"
+                }
+              ]
+            },
+            "description": "Filtra los ingresos del usuario autenticado por rango de montos."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Income",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_income_url}}/api/v1/incomes/{{incomeId3}}",
+              "host": ["{{ms_income_url}}"],
+              "path": ["api", "v1", "incomes", "{{incomeId3}}"]
+            },
+            "description": "Elimina lógicamente un ingreso (soft delete). Solo puede eliminar ingresos que pertenecen al usuario autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Try to Delete Another User's Income (FORBIDDEN)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_income_url}}/api/v1/incomes/{{incomeId1}}",
+              "host": ["{{ms_income_url}}"],
+              "path": ["api", "v1", "incomes", "{{incomeId1}}"]
+            },
+            "description": "PRUEBA DE SEGURIDAD: Intenta eliminar un ingreso de otro usuario. Debe devolver 403 FORBIDDEN."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "ms_income_url",
+      "value": "http://localhost:8100",
+      "type": "string"
+    }
+  ]
+}

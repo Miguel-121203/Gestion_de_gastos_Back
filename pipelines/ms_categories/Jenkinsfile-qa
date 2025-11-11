@@ -55,11 +55,14 @@ pipeline {
                 echo 'Deploying Categories Service QA...'
                 sh '''
                     echo "🚀 Desplegando Categories Service QA..."
-                    docker stop ms_categories-qa || true
-                    docker rm ms_categories-qa || true
+
+                    docker network create gestios-gastos-back-qa || true
+                    docker network connect gestios-gastos-back-qa DataBase-qa || true
+                    docker stop mscategories-qa || true
+                    docker rm mscategories-qa || true
 
                     docker run -d \
-                      --name ms_categories-qa \
+                      --name mscategories-qa \
                       --network gestion-gastos-qa_default \
                       -p 8111:8090 \
                       -e SPRING_PROFILES_ACTIVE=qa \

@@ -1,0 +1,81 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB_REPO = 'miguel1203/gestion-user'
+        IMAGE_TAG = 'dev'
+        DOCKER_USER = 'miguel1203'
+        DOCKER_PASS = 'dckr_pat_5CQzKCl99YfG_0nuHQMiuxUw6AY'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code...'
+                checkout scm
+            }
+        }
+
+
+        stage('Build Application') {
+            steps {
+                echo 'Building Spring Boot User Service...'
+                dir('Back/ms_user') {
+                    sh 'chmod +x ./mvnw'
+                    sh './mvnw clean package -DskipTests'
+                }
+            }
+        }
+
+        stage('Copy JAR to Dockerfile location') {
+            steps {
+                echo 'Copying JAR to Dockerfile location...'
+                sh '''
+                    mkdir -p ./Back/ms_user/target
+                    cp ./Back/ms_user/target/*.jar ./Back/ms_user/target/ || echo "JAR already in correct location"
+                '''
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                echo 'Building and pushing Docker image for User Service...'
+                dir('Back/ms_user') {
+                    script {
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+
+                        def image = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
+                        image.push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                echo 'Deploying User Service DEV...'
+                sh '''
+                    echo "🚀 Desplegando User Service DEV..."
+                    docker network create gestios-gastos-back-dev || true
+                    docker network connect gestios-gastos-back-dev DataBase-dev || true
+                    
+                    docker stop msuser-dev || true
+                    docker rm msuser-dev || true
+
+                    docker run -d \
+                      --name msuser-dev \
+                      --network gestios-gastos-back-dev \
+                      -p 8202:8200 \
+                      -e SPRING_PROFILES_ACTIVE=dev \
+                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-dev:5432/gestion_gastos_dev" \
+                      -e SPRING_DATASOURCE_USERNAME=postgres \
+                      -e SPRING_DATASOURCE_PASSWORD=dev123456 \
+                      ${DOCKER_HUB_REPO}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+
+    }
+
+}

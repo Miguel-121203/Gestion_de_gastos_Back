@@ -1,0 +1,317 @@
+{
+  "info": {
+    "name": "MS_EXPENSE - Gestión de Gastos",
+    "description": "Colección de endpoints para el microservicio de gastos (ms_expense) - Port 8080. REQUIERE TOKEN JWT.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Expenses",
+      "item": [
+        {
+          "name": "Create Expense - Almuerzo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"expenseId1\", jsonData.expenseId);",
+                  "    pm.test(\"Expense created successfully\", function () {",
+                  "        pm.expect(jsonData.expenseId).to.not.be.undefined;",
+                  "        pm.expect(jsonData.userId).to.equal(parseInt(pm.environment.get(\"userId\")));",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 45.50,\n  \"expenseCategoryId\": {{expenseCategoryId1}},\n  \"expenseDate\": \"2025-11-10\",\n  \"description\": \"Almuerzo en restaurante italiano\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_expense_url}}/api/v1/expenses",
+              "host": ["{{ms_expense_url}}"],
+              "path": ["api", "v1", "expenses"]
+            },
+            "description": "Crea un gasto asociado al usuario autenticado. El userId se extrae automáticamente del token JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Expense - Transporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"expenseId2\", jsonData.expenseId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 25.00,\n  \"expenseCategoryId\": {{expenseCategoryId2}},\n  \"expenseDate\": \"2025-11-09\",\n  \"description\": \"Uber al trabajo\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_expense_url}}/api/v1/expenses",
+              "host": ["{{ms_expense_url}}"],
+              "path": ["api", "v1", "expenses"]
+            },
+            "description": "Crea un gasto de transporte."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Expense - Supermercado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"expenseId3\", jsonData.expenseId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 120.75,\n  \"expenseCategoryId\": {{expenseCategoryId1}},\n  \"expenseDate\": \"2025-11-08\",\n  \"description\": \"Compras del supermercado\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_expense_url}}/api/v1/expenses",
+              "host": ["{{ms_expense_url}}"],
+              "path": ["api", "v1", "expenses"]
+            },
+            "description": "Crea un gasto de supermercado."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All User Expenses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_expense_url}}/api/v1/expenses",
+              "host": ["{{ms_expense_url}}"],
+              "path": ["api", "v1", "expenses"]
+            },
+            "description": "Obtiene todos los gastos del usuario autenticado. Solo devuelve los gastos que pertenecen al usuario del token."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Expense",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50.00,\n  \"description\": \"Almuerzo en restaurante italiano - actualizado con propina\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_expense_url}}/api/v1/expenses/{{expenseId1}}",
+              "host": ["{{ms_expense_url}}"],
+              "path": ["api", "v1", "expenses", "{{expenseId1}}"]
+            },
+            "description": "Actualiza un gasto existente. Solo puede actualizar gastos que pertenecen al usuario autenticado (validación de ownership)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Expenses by Date Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_expense_url}}/api/v1/expenses/date-range?startDate=2025-11-01&endDate=2025-11-30",
+              "host": ["{{ms_expense_url}}"],
+              "path": ["api", "v1", "expenses", "date-range"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2025-11-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-11-30"
+                }
+              ]
+            },
+            "description": "Filtra los gastos del usuario autenticado por rango de fechas. Formato: yyyy-MM-dd"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Expenses by Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_expense_url}}/api/v1/expenses/category/{{expenseCategoryId1}}",
+              "host": ["{{ms_expense_url}}"],
+              "path": ["api", "v1", "expenses", "category", "{{expenseCategoryId1}}"]
+            },
+            "description": "Filtra los gastos del usuario autenticado por categoría específica."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Expenses by Amount Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_expense_url}}/api/v1/expenses/amount-range?minAmount=10&maxAmount=100",
+              "host": ["{{ms_expense_url}}"],
+              "path": ["api", "v1", "expenses", "amount-range"],
+              "query": [
+                {
+                  "key": "minAmount",
+                  "value": "10"
+                },
+                {
+                  "key": "maxAmount",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Filtra los gastos del usuario autenticado por rango de montos."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Expense",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_expense_url}}/api/v1/expenses/{{expenseId3}}",
+              "host": ["{{ms_expense_url}}"],
+              "path": ["api", "v1", "expenses", "{{expenseId3}}"]
+            },
+            "description": "Elimina lógicamente un gasto (soft delete). Solo puede eliminar gastos que pertenecen al usuario autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Try to Update Another User's Expense (FORBIDDEN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token2}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 999.99,\n  \"description\": \"Intento de modificar gasto de otro usuario\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_expense_url}}/api/v1/expenses/{{expenseId1}}",
+              "host": ["{{ms_expense_url}}"],
+              "path": ["api", "v1", "expenses", "{{expenseId1}}"]
+            },
+            "description": "PRUEBA DE SEGURIDAD: Intenta actualizar un gasto de otro usuario. Debe devolver 403 FORBIDDEN."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "ms_expense_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}

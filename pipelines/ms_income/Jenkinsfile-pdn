@@ -55,11 +55,14 @@ pipeline {
                 echo 'Deploying Income Service PRODUCTION...'
                 sh '''
                     echo "🚀 Desplegando Income Service PRODUCTION..."
-                    docker stop ms_income-pdn || true
-                    docker rm ms_income-pdn || true
+
+                    docker network create gestios-gastos-back-pdn || true
+                    docker network connect gestios-gastos-back-pdn DataBase-pdn || true
+                    docker stop msincome-pdn || true
+                    docker rm msincome-pdn || true
 
                     docker run -d \
-                      --name ms_income-pdn \
+                      --name msincome-pdn \
                       --network gestion-gastos-pdn_default \
                       -p 8100:8100 \
                       -e SPRING_PROFILES_ACTIVE=pdn \

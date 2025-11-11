@@ -1,0 +1,161 @@
+{
+  "info": {
+    "name": "MS_USER - Gestión de Usuarios y Autenticación",
+    "description": "Colección de endpoints para el microservicio de usuarios (ms_user) - Port 8110",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"token\", jsonData.token);",
+                  "    pm.environment.set(\"userId\", jsonData.userId);",
+                  "    pm.test(\"Token saved to environment\", function () {",
+                  "        pm.expect(jsonData.token).to.not.be.undefined;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@test.com\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_user_url}}/api/v1/auth/register",
+              "host": ["{{ms_user_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Registra un nuevo usuario en el sistema. La contraseña debe tener al menos 8 caracteres."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"token\", jsonData.token);",
+                  "    pm.environment.set(\"userId\", jsonData.userId);",
+                  "    pm.test(\"Login successful\", function () {",
+                  "        pm.expect(jsonData.token).to.not.be.undefined;",
+                  "        pm.expect(jsonData.userId).to.not.be.undefined;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@test.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_user_url}}/api/v1/auth/login",
+              "host": ["{{ms_user_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Autentica un usuario y devuelve un token JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ms_user_url}}/api/v1/auth/validate",
+              "host": ["{{ms_user_url}}"],
+              "path": ["api", "v1", "auth", "validate"]
+            },
+            "description": "Valida si un token JWT es válido y devuelve información del usuario."
+          },
+          "response": []
+        },
+        {
+          "name": "Register User 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"token2\", jsonData.token);",
+                  "    pm.environment.set(\"userId2\", jsonData.userId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria@test.com\",\n  \"password\": \"Password456!\",\n  \"firstName\": \"María\",\n  \"lastName\": \"García\"\n}"
+            },
+            "url": {
+              "raw": "{{ms_user_url}}/api/v1/auth/register",
+              "host": ["{{ms_user_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Registra un segundo usuario para probar aislamiento de datos."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "ms_user_url",
+      "value": "http://localhost:8110",
+      "type": "string"
+    }
+  ]
+}

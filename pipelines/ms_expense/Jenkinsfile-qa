@@ -68,11 +68,14 @@ pipeline {
                 echo 'Deploying Expense Service QA...'
                 sh '''
                     echo "🚀 Desplegando Expense Service QA..."
-                    docker stop ms_expense-qa || true
-                    docker rm ms_expense-qa || true
+
+                    docker network create gestios-gastos-back-qa || true
+                    docker network connect gestios-gastos-back-qa DataBase-qa || true
+                    docker stop msexpense-qa || true
+                    docker rm msexpense-qa || true
 
                     docker run -d \
-                      --name ms_expense-qa \
+                      --name msexpense-qa \
                       --network gestion-gastos-qa_default \
                       -p 8081:8080 \
                       -e SPRING_PROFILES_ACTIVE=qa \

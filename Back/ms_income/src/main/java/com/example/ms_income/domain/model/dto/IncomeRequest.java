@@ -29,7 +29,6 @@ public class IncomeRequest {
     @Size(max = 500, message = "Description must be 500 characters max")
     private String description;
 
-    @NotNull(message = "User ID is required")
-    @Positive(message = "User ID must be positive")
+    // User ID is extracted from JWT token, not from request body
     private Long userId;
 }
