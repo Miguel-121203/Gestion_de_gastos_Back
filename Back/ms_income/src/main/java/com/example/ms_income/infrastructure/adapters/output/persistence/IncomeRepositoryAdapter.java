@@ -38,6 +38,11 @@ public class IncomeRepositoryAdapter implements IncomeRepositoryPort {
     }
 
     @Override
+    public List<Income> findByUserIdAndActiveTrue(Long userId) {
+        return incomeRepository.findByUserIdAndActiveTrue(userId);
+    }
+
+    @Override
     public List<Income> findByUserIdAndIncomeCategoryIdAndActiveTrue(Long userId, Long categoryId) {
         return incomeRepository.findByUserIdAndIncomeCategoryIdAndActiveTrue(userId, categoryId);
     }

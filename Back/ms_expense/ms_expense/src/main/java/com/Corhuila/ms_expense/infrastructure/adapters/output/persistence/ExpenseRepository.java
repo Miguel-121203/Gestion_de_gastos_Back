@@ -16,6 +16,9 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     Optional<Expense> findByExpenseIdAndActiveTrue(Long expenseId);
 
+    @Query("SELECT e FROM Expense e WHERE e.userId = :userId AND e.active = true")
+    List<Expense> findByUserIdAndActiveTrue(@Param("userId") Long userId);
+
     @Query("SELECT e FROM Expense e WHERE e.userId = :userId AND e.expenseCategoryId = :categoryId AND e.active = true")
     List<Expense> findByUserIdAndExpenseCategoryIdAndActiveTrue(@Param("userId") Long userId, @Param("categoryId") Long categoryId);
 

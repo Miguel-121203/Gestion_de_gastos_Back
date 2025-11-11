@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<jjwt.version>0.12.3</jjwt.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -37,6 +38,25 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- JWT -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>${jjwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>
@@ -73,21 +93,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
-
-		<!-- Apache POI for Excel generation -->
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>5.4.0</version>
-		</dependency>
-
-		<!-- iText for PDF generation -->
-		<dependency>
-			<groupId>com.itextpdf</groupId>
-			<artifactId>itext7-core</artifactId>
-			<version>7.2.5</version>
-			<type>pom</type>
 		</dependency>
 	</dependencies>
 

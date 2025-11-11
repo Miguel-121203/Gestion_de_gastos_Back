@@ -1,0 +1,94 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB_REPO = 'miguel1203/gestion-expense'
+        IMAGE_TAG = 'pdn'
+        DOCKER_USER = 'miguel1203'
+        DOCKER_PASS = 'dckr_pat_5CQzKCl99YfG_0nuHQMiuxUw6AY'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code...'
+                checkout scm
+            }
+        }
+
+        stage('Deploy Database') {
+            steps {
+                echo 'Deploying PostgreSQL PRODUCTION...'
+                dir('DB') {
+                    sh '''
+                        echo "🚀 Desplegando PostgreSQL PRODUCTION..."
+                        docker compose -f docker-compose-pdn.yml -p gestion-gastos-pdn up -d
+                        sleep 30
+                    '''
+                }
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                echo 'Building Spring Boot Expense Service...'
+                dir('Back/ms_expense/ms_expense') {
+                    sh 'chmod +x ./mvnw'
+                    sh './mvnw clean package -DskipTests'
+                }
+            }
+        }
+
+        stage('Copy JAR to Dockerfile location') {
+            steps {
+                echo 'Copying JAR to Dockerfile location...'
+                sh '''
+                    mkdir -p ./Back/ms_expense/target
+                    cp ./Back/ms_expense/ms_expense/target/*.jar ./Back/ms_expense/target/
+                '''
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                echo 'Building and pushing Docker image for Expense Service...'
+                dir('Back/ms_expense') {
+                    script {
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+
+                        def image = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
+                        image.push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                echo 'Deploying Expense Service PRODUCTION...'
+                sh '''
+                    echo "🚀 Desplegando Expense Service PRODUCTION..."
+
+                    docker network create gestios-gastos-back-pdn || true
+                    docker network connect gestios-gastos-back-pdn DataBase-pdn || true
+                    docker stop msexpense-pdn || true
+                    docker rm msexpense-pdn || true
+
+                    docker run -d \
+                      --name msexpense-pdn \
+                      --network gestion-gastos-pdn_default \
+                      -p 8080:8080 \
+                      -e SPRING_PROFILES_ACTIVE=pdn \
+                      -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-pdn:5432/gestion_gastos_pdn" \
+                      -e SPRING_DATASOURCE_USERNAME=postgres \
+                      -e SPRING_DATASOURCE_PASSWORD=${POSTGRES_PDN_PASSWORD:-pdn123456} \
+                      -e CATEGORIES_SERVICE_URL=http://localhost:8110 \
+                      ${DOCKER_HUB_REPO}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+
+    }
+
+}
