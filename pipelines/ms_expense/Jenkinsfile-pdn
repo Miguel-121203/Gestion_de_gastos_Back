@@ -68,11 +68,14 @@ pipeline {
                 echo 'Deploying Expense Service PRODUCTION...'
                 sh '''
                     echo "🚀 Desplegando Expense Service PRODUCTION..."
-                    docker stop ms_expense-pdn || true
-                    docker rm ms_expense-pdn || true
+
+                    docker network create gestios-gastos-back-pdn || true
+                    docker network connect gestios-gastos-back-pdn DataBase-pdn || true
+                    docker stop msexpense-pdn || true
+                    docker rm msexpense-pdn || true
 
                     docker run -d \
-                      --name ms_expense-pdn \
+                      --name msexpense-pdn \
                       --network gestion-gastos-pdn_default \
                       -p 8080:8080 \
                       -e SPRING_PROFILES_ACTIVE=pdn \

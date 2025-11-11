@@ -55,11 +55,14 @@ pipeline {
                 echo 'Deploying Categories Service PRODUCTION...'
                 sh '''
                     echo "🚀 Desplegando Categories Service PRODUCTION..."
-                    docker stop ms_categories-pdn || true
-                    docker rm ms_categories-pdn || true
+
+                    docker network create gestios-gastos-back-qa || true
+                    docker network connect gestios-gastos-back-qa DataBase-qa || true
+                    docker stop mscategories-pdn || true
+                    docker rm mscategories-pdn || true
 
                     docker run -d \
-                      --name ms_categories-pdn \
+                      --name mscategories-pdn \
                       --network gestion-gastos-pdn_default \
                       -p 8110:8090 \
                       -e SPRING_PROFILES_ACTIVE=pdn \
