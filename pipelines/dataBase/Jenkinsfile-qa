@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code...'
+                checkout scm
+            }
+        }
+
+        stage('Deploy Database') {
+            steps {
+                echo 'Deploying PostgreSQL QA...'
+                dir('DB') {
+                    sh '''
+                        echo "🚀 Desplegando PostgreSQL QA..."
+                        docker compose -f docker-compose-qa.yml -p gestion-gastos-qa up -d
+                        sleep 30
+                    '''
+                }
+            }
+        }
+
+
+
+    }
+
+}
