@@ -15,7 +15,7 @@ pipeline {
                 dir('DB') {
                     sh '''
                         echo "🚀 Desplegando PostgreSQL DEV..."
-                        /usr/bin/docker-compose -f docker-compose-dev.yml -p gestion-gastos-dev up -d
+                        docker compose -f docker-compose-dev.yml -p gestion-gastos-dev up -d
                         sleep 10
                         echo "✅ Database deployed successfully"
                     '''
