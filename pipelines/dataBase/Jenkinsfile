@@ -49,7 +49,7 @@ CREATE USER expense_user_dev WITH PASSWORD 'dev123456';
 GRANT ALL PRIVILEGES ON DATABASE gestion_gastos_dev TO expense_user_dev;
 
 -- Asegurar permisos sobre schema público
-\connect gestion_gastos_dev
+\\connect gestion_gastos_dev
 GRANT ALL PRIVILEGES ON SCHEMA public TO expense_user_dev;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO expense_user_dev;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO expense_user_dev;
