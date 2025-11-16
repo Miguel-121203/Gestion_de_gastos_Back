@@ -24,15 +24,6 @@ pipeline {
             }
         }
 
-        stage('Copy JAR to Dockerfile location') {
-            steps {
-                echo 'Copying JAR to Dockerfile location...'
-                sh '''
-                    mkdir -p ./Back/ms_expense/target
-                    cp ./Back/ms_expense/ms_expense/target/*.jar ./Back/ms_expense/target/
-                '''
-            }
-        }
 
         stage('Build Docker Image') {
             steps {
