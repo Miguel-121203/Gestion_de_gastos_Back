@@ -1,13 +1,32 @@
-stage('Deploy Database') {
-    steps {
-        echo 'Deploying PostgreSQL DEV...'
-        dir('DB') {
-            sh '''
-                echo "🚀 Desplegando PostgreSQL DEV..."
-                docker-compose -f docker-compose-dev.yml -p gestion-gastos-dev up -d
-                sleep 10
-                echo "✅ Database deployed successfully"
-            '''
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code...'
+                checkout scm
+            }
+        }
+
+        stage('Deploy Database') {
+            steps {
+                echo 'Deploying PostgreSQL DEV...'
+                dir('DB') {
+                    sh '''
+                        echo "🚀 Desplegando PostgreSQL DEV..."
+                        docker-compose -f docker-compose-dev.yml -p gestion-gastos-dev up -d
+                        sleep 10
+                        echo "✅ Database deployed successfully"
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline completed'
         }
     }
 }
