@@ -9,68 +9,26 @@ pipeline {
             }
         }
 
-        stage('Create docker-compose file') {
-            steps {
-                echo 'Creating docker-compose-dev.yml...'
-                sh '''
-                    cat > docker-compose-dev.yml << 'EOF'
-version: '3.8'
-
-services:
-  postgres-dev:
-    image: postgres:15
-    container_name: DataBase-dev
-    environment:
-      POSTGRES_DB: gestion_gastos_dev
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: dev123456
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_dev_data:/var/lib/postgresql/data
-      - ./init-dev.sql:/docker-entrypoint-initdb.d/init.sql
-
-volumes:
-  postgres_dev_data:
-EOF
-                '''
-            }
-        }
-
-        stage('Create init-dev.sql file') {
-            steps {
-                echo 'Creating init-dev.sql...'
-                sh '''
-                    cat > init-dev.sql << 'EOF'
--- Crear usuario de aplicación para DEV
-CREATE USER expense_user_dev WITH PASSWORD 'dev123456';
-
--- Darle permisos sobre la base de desarrollo
-GRANT ALL PRIVILEGES ON DATABASE gestion_gastos_dev TO expense_user_dev;
-
--- Asegurar permisos sobre schema público
-\\connect gestion_gastos_dev
-GRANT ALL PRIVILEGES ON SCHEMA public TO expense_user_dev;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO expense_user_dev;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO expense_user_dev;
-
--- Insertar datos de prueba para desarrollo
-INSERT INTO expenses (description, amount, category, created_date) VALUES 
-('Almuerzo equipo desarrollo', 25000, 'COMIDA', NOW()),
-('Licencias software dev', 150000, 'SOFTWARE', NOW()),
-('Transporte reunión cliente', 12000, 'TRANSPORTE', NOW())
-ON CONFLICT DO NOTHING;
-EOF
-                '''
-            }
-        }
-
         stage('Deploy Database') {
             steps {
                 echo 'Deploying PostgreSQL DEV...'
                 sh '''
                     echo "🚀 Desplegando PostgreSQL DEV..."
-                    docker-compose -f docker-compose-dev.yml -p gestion-gastos-dev up -d
+                    
+                    docker network create gestios-gastos-back-dev || true
+                    
+                    docker stop DataBase-dev || true
+                    docker rm DataBase-dev || true
+                    
+                    docker run -d \
+                      --name DataBase-dev \
+                      --network gestios-gastos-back-dev \
+                      -p 5432:5432 \
+                      -e POSTGRES_DB=gestion_gastos_dev \
+                      -e POSTGRES_USER=postgres \
+                      -e POSTGRES_PASSWORD=dev123456 \
+                      postgres:15
+                    
                     sleep 10
                     echo "✅ Database deployed successfully"
                 '''
