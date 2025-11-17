@@ -1,0 +1,28 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code...'
+                checkout scm
+            }
+        }
+
+        stage('Deploy Database') {
+            steps {
+                echo 'Deploying PostgreSQL PRODUCTION...'
+                dir('DB') {
+                    sh '''
+                        echo "🚀 Desplegando PostgreSQL PRODUCTION..."
+                        docker compose -f docker-compose-pdn.yml -p gestion-gastos-pdn up -d
+                        sleep 30
+                    '''
+                }
+            }
+        }
+
+
+    }
+
+}
