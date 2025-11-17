@@ -1,11 +1,9 @@
 pipeline {
     agent any
 
-   environment {
-        DOCKER_HUB_REPO = 'miguel1203/gestion-categories'
-        IMAGE_TAG = 'pdn'
-        DOCKER_USER = 'miguel1203'
-        DOCKER_PASS = 'dckr_pat_5CQzKCl99YfG_0nuHQMiuxUw6AY'
+    environment {
+        IMAGE_NAME = 'gestion-categories-pdn'
+        IMAGE_TAG = 'latest'
     }
 
     stages {
@@ -18,7 +16,7 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                echo 'Building Spring Boot Categories Service...'
+                echo 'Building Spring Boot Categories Service PDN...'
                 dir('Back/ms_categories') {
                     sh 'chmod +x ./mvnw'
                     sh './mvnw clean package -DskipTests'
@@ -26,55 +24,50 @@ pipeline {
             }
         }
 
-        stage('Copy JAR to Dockerfile location') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Copying JAR to Dockerfile location...'
-                sh '''
-                    mkdir -p ./Back/ms_categories/target
-                    cp ./Back/ms_categories/target/*.jar ./Back/ms_categories/target/ || echo "JAR already in correct location"
-                '''
-            }
-        }
-
-        stage('Build and Push Docker Image') {
-            steps {
-                echo 'Building and pushing Docker image for Categories Service...'
+                echo 'Building Docker image...'
                 dir('Back/ms_categories') {
-                    script {
-                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-
-                        def image = docker.build("${DOCKER_HUB_REPO}:${IMAGE_TAG}")
-                        image.push()
-                    }
+                    sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
                 }
             }
         }
 
         stage('Deploy Application') {
             steps {
-                echo 'Deploying Categories Service PRODUCTION...'
+                echo 'Deploying Categories Service PDN...'
                 sh '''
-                    echo "🚀 Desplegando Categories Service PRODUCTION..."
-
-                    docker network create gestios-gastos-back-qa || true
-                    docker network connect gestios-gastos-back-qa DataBase-qa || true
+                    docker network create gestios-gastos-back-pdn || true
+                    
                     docker stop mscategories-pdn || true
                     docker rm mscategories-pdn || true
 
                     docker run -d \
                       --name mscategories-pdn \
-                      --network gestion-gastos-pdn_default \
-                      -p 8110:8090 \
+                      --network gestios-gastos-back-pdn \
+                      -p 8090:8090 \
                       -e SPRING_PROFILES_ACTIVE=pdn \
                       -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-pdn:5432/gestion_gastos_pdn" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
-                      -e SPRING_DATASOURCE_PASSWORD=${POSTGRES_PDN_PASSWORD:-pdn123456} \
-                      ${DOCKER_HUB_REPO}:${IMAGE_TAG}
+                      -e SPRING_DATASOURCE_PASSWORD=pdn123456 \
+                      ${IMAGE_NAME}:${IMAGE_TAG}
+                    
+                    sleep 10
+                    if docker ps | grep mscategories-pdn; then
+                        echo "✅ Categories Service PDN running on port 8090"
+                    else
+                        echo "❌ Failed to start Categories Service PDN"
+                        docker logs mscategories-pdn || true
+                        exit 1
+                    fi
                 '''
             }
         }
-
-
     }
 
+    post {
+        always {
+            echo '✅ Pipeline completed'
+        }
+    }
 }
