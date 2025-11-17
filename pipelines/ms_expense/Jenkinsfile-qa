@@ -71,6 +71,7 @@ pipeline {
                         docker logs msexpense-qa || true
                         exit 1
                     fi
+
                 '''
             }
         }

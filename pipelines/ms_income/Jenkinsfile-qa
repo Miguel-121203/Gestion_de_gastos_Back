@@ -61,6 +61,7 @@ pipeline {
                         docker logs msincome-qa || true
                         exit 1
                     fi
+
                 '''
             }
         }

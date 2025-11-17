@@ -82,7 +82,7 @@ pipeline {
                       -e SPRING_DATASOURCE_URL="jdbc:postgresql://DataBase-pdn:5432/gestion_gastos_pdn" \
                       -e SPRING_DATASOURCE_USERNAME=postgres \
                       -e SPRING_DATASOURCE_PASSWORD=${POSTGRES_PDN_PASSWORD:-pdn123456} \
-                      -e CATEGORIES_SERVICE_URL=http://localhost:8110 \
+                      -e CATEGORIES_SERVICE_URL=http://mscategories-pdn:8090 \
                       ${DOCKER_HUB_REPO}:${IMAGE_TAG}
                 '''
             }
